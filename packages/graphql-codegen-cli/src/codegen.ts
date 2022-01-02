@@ -21,7 +21,7 @@ import path from 'path';
 import { createRequire } from 'module';
 import Listr from 'listr';
 
-const makeDefaultLoader = (from: string) => {
+export const makeDefaultLoader = (from: string) => {
   if (fs.statSync(from).isDirectory()) {
     from = path.join(from, '__fake.js');
   }
