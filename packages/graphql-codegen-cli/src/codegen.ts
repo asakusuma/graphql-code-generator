@@ -114,7 +114,7 @@ export async function executeCodegen(input: CodegenContext | Types.Config): Prom
   const documentsLoadingCache = createCache(async function (hash) {
     const documents = await context.loadDocuments(JSON.parse(hash));
     return {
-      documents: documents,
+      documents,
     };
   });
 
@@ -259,7 +259,7 @@ export async function executeCodegen(input: CodegenContext | Types.Config): Prom
 
                       const allDocuments = [...rootDocuments, ...outputSpecificDocuments];
 
-                      const hash = JSON.stringify(allDocuments);
+                      const hash = JSON.stringify({ pointer: allDocuments, schema: outputSchema });
                       const result = await documentsLoadingCache.load(hash);
                       const documents: Types.DocumentFile[] = result.documents;
 
