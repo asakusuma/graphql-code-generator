@@ -1,10 +1,10 @@
 {
-  "name": "@graphql-codegen/typescript-operations",
-  "version": "2.4.0",
-  "description": "GraphQL Code Generator plugin for generating TypeScript types for GraphQL queries, mutations, subscriptions and fragments",
+  "name": "asa-graphql-ts-typescript-operations",
+  "version": "0.1.0",
+  "description": "Fork of @graphql-codegen/typescript-operations",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dotansimha/graphql-code-generator.git",
+    "url": "https://github.com/asakusuma/graphql-code-generator.git",
     "directory": "packages/plugins/typescript/operations"
   },
   "license": "MIT",
