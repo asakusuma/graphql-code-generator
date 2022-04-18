@@ -7,6 +7,7 @@ import { RawDocumentsConfig, AvoidOptionalsConfig } from '@graphql-codegen/visit
  * Note: In most configurations, this plugin requires you to use `typescript as well, because it depends on its base types.
  */
 export interface TypeScriptDocumentsPluginConfig extends RawDocumentsConfig {
+  referenceFragmentSpreads?: boolean;
   /**
    * @description The [GraphQL spec](https://spec.graphql.org/draft/#sel-FAHjBJFCAACE_Gh7d)
    * allows arrays and a single primitive value for list input. This allows to

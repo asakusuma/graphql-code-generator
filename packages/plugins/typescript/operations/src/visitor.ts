@@ -13,7 +13,15 @@ import {
   wrapTypeWithModifiers,
 } from '@graphql-codegen/visitor-plugin-common';
 import autoBind from 'auto-bind';
-import { GraphQLNamedType, GraphQLOutputType, GraphQLSchema, isEnumType, isNonNullType } from 'graphql';
+import {
+  GraphQLNamedType,
+  GraphQLOutputType,
+  GraphQLSchema,
+  isEnumType,
+  isNonNullType,
+  SelectionNode,
+  FragmentSpreadNode,
+} from 'graphql';
 import { TypeScriptDocumentsPluginConfig } from './config';
 import { TypeScriptOperationVariablesToObject } from './ts-operation-variables-to-object';
 import { TypeScriptSelectionSetProcessor } from './ts-selection-set-processor';
@@ -24,6 +32,33 @@ export interface TypeScriptDocumentsParsedConfig extends ParsedDocumentsConfig {
   immutableTypes: boolean;
   noExport: boolean;
   maybeValue: string;
+  referenceFragmentSpreads: boolean;
+}
+
+function isFragmentSpreadNode(node: SelectionNode): node is FragmentSpreadNode {
+  return node.kind === 'FragmentSpread';
+}
+
+export class FragmentSpreadImportHandler extends SelectionSetToObject<TypeScriptDocumentsParsedConfig> {
+  protected _buildGroupedSelections(): { grouped: Record<string, string[]>; mustAddEmptyObject: boolean } {
+    const original = super._buildGroupedSelections();
+    if (this._config.referenceFragmentSpreads) {
+      const fragmentSpreads = this._selectionSet.selections.filter(isFragmentSpreadNode);
+      if (fragmentSpreads.length < 1) {
+        return original;
+      }
+      const fragmentSpreadTypes = fragmentSpreads.map(fragment => {
+        return ' & ' + fragment.name.value + this._getFragmentSuffix(fragment.name.value);
+      });
+      Object.keys(original.grouped).forEach(key => {
+        const defs = original.grouped[key];
+        for (let i = 0; i < defs.length; i++) {
+          defs[i] += fragmentSpreadTypes.join('');
+        }
+      });
+    }
+    return original;
+  }
 }
 
 export class TypeScriptDocumentsVisitor extends BaseDocumentsVisitor<
@@ -40,6 +75,7 @@ export class TypeScriptDocumentsVisitor extends BaseDocumentsVisitor<
         immutableTypes: getConfigValue(config.immutableTypes, false),
         nonOptionalTypename: getConfigValue(config.nonOptionalTypename, false),
         preResolveTypes: getConfigValue(config.preResolveTypes, true),
+        referenceFragmentSpreads: getConfigValue(config.referenceFragmentSpreads, false),
       } as TypeScriptDocumentsParsedConfig,
       schema
     );
@@ -86,7 +122,7 @@ export class TypeScriptDocumentsVisitor extends BaseDocumentsVisitor<
       processorConfig
     );
     this.setSelectionSetHandler(
-      new SelectionSetToObject(
+      new FragmentSpreadImportHandler(
         processor,
         this.scalars,
         this.schema,
