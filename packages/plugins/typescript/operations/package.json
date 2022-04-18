@@ -1,6 +1,6 @@
 {
   "name": "asa-graphql-ts-typescript-operations",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fork of @graphql-codegen/typescript-operations",
   "repository": {
     "type": "git",

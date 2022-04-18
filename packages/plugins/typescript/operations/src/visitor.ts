@@ -21,6 +21,7 @@ import {
   isNonNullType,
   SelectionNode,
   FragmentSpreadNode,
+  SelectionSetNode,
 } from 'graphql';
 import { TypeScriptDocumentsPluginConfig } from './config';
 import { TypeScriptOperationVariablesToObject } from './ts-operation-variables-to-object';
@@ -40,6 +41,19 @@ function isFragmentSpreadNode(node: SelectionNode): node is FragmentSpreadNode {
 }
 
 export class FragmentSpreadImportHandler extends SelectionSetToObject<TypeScriptDocumentsParsedConfig> {
+  public createNext(parentSchemaType: GraphQLNamedType, selectionSet: SelectionSetNode): SelectionSetToObject {
+    return new FragmentSpreadImportHandler(
+      this._processor,
+      this._scalars,
+      this._schema,
+      this._convertName.bind(this),
+      this._getFragmentSuffix.bind(this),
+      this._loadedFragments,
+      this._config,
+      parentSchemaType,
+      selectionSet
+    );
+  }
   protected _buildGroupedSelections(): { grouped: Record<string, string[]>; mustAddEmptyObject: boolean } {
     const original = super._buildGroupedSelections();
     if (this._config.referenceFragmentSpreads) {
