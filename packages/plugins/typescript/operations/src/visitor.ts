@@ -68,6 +68,7 @@ export class FragmentSpreadImportHandler extends SelectionSetToObject<TypeScript
         });
         if (fragmentSpreads.length === this._selectionSet.selections.length) {
           // If the fragment spread is the only selection
+          original.mustAddEmptyObject = false;
           original.grouped[Object.keys(original.grouped)[0]] = fragmentSpreadTypes;
         } else {
           Object.keys(original.grouped).forEach(key => {
