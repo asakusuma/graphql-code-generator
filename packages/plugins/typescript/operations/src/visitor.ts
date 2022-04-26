@@ -27,6 +27,8 @@ import { TypeScriptDocumentsPluginConfig } from './config';
 import { TypeScriptOperationVariablesToObject } from './ts-operation-variables-to-object';
 import { TypeScriptSelectionSetProcessor } from './ts-selection-set-processor';
 
+const unionSeparator = ' & ';
+
 export interface TypeScriptDocumentsParsedConfig extends ParsedDocumentsConfig {
   arrayInputCoercion: boolean;
   avoidOptionals: AvoidOptionalsConfig;
@@ -60,16 +62,22 @@ export class FragmentSpreadImportHandler extends SelectionSetToObject<TypeScript
       const fragmentSpreads = this._selectionSet.selections.filter(isFragmentSpreadNode);
       if (fragmentSpreads.length < 1) {
         return original;
-      }
-      const fragmentSpreadTypes = fragmentSpreads.map(fragment => {
-        return ' & ' + fragment.name.value + this._getFragmentSuffix(fragment.name.value);
-      });
-      Object.keys(original.grouped).forEach(key => {
-        const defs = original.grouped[key];
-        for (let i = 0; i < defs.length; i++) {
-          defs[i] += fragmentSpreadTypes.join('');
+      } else {
+        const fragmentSpreadTypes = fragmentSpreads.map(fragment => {
+          return fragment.name.value + this._getFragmentSuffix(fragment.name.value);
+        });
+        if (fragmentSpreads.length === this._selectionSet.selections.length) {
+          // If the fragment spread is the only selection
+          original.grouped[Object.keys(original.grouped)[0]] = fragmentSpreadTypes;
+        } else {
+          Object.keys(original.grouped).forEach(key => {
+            const defs = original.grouped[key];
+            for (let i = 0; i < defs.length; i++) {
+              defs[i] += unionSeparator + fragmentSpreadTypes.join(unionSeparator);
+            }
+          });
         }
-      });
+      }
     }
     return original;
   }
