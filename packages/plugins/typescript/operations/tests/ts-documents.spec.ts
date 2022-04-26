@@ -417,7 +417,9 @@ describe('TypeScript Operations Plugin', () => {
           outputFile: '',
         }
       );
-      expect(content).toBeSimilarStringTo(`comments: Array<CommentFragmentFragment | {`);
+      expect(content).toBeSimilarStringTo(
+        `export type PostPlusFragment = { __typename?: 'Post', comments: Array<CommentFragmentFragment | { __typename?: 'ImageComment' }> };`
+      );
     });
 
     it('Should handle "namespacedImportName" and "preResolveTypes" together', async () => {
