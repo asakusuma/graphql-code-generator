@@ -326,7 +326,52 @@ describe('TypeScript Operations Plugin', () => {
           outputFile: '',
         }
       );
-      expect(content).toBeSimilarStringTo(`export type PostPlusFragment = { __typename?: 'Post' } & PostFragment;`);
+      expect(content).toBeSimilarStringTo(`export type PostPlusFragment = PostFragment;`);
+    });
+
+    it('Can use imported fragment spreads when two spreads are the only item in selection set', async () => {
+      const testSchema = buildSchema(/* GraphQL */ `
+        interface Comment {
+          id: ID!
+          title: String!
+        }
+
+        type TextComment implements Comment {
+          id: ID!
+          title: String!
+          text: String!
+        }
+
+        type ImageComment implements Comment {
+          id: ID!
+          title: String!
+          image: String!
+        }
+
+        type Post {
+          id: ID!
+          comments: [Comment!]!
+        }
+      `);
+
+      const ast = parse(/* GraphQL */ `
+        fragment PostPlus on Post {
+          ...Post
+          ...AnotherFragment
+        }
+      `);
+
+      const { content } = await plugin(
+        testSchema,
+        [{ location: 'test-file.ts', document: ast }],
+        {
+          referenceFragmentSpreads: true,
+        },
+        {
+          outputFile: '',
+        }
+      );
+      expect(content).toBeSimilarStringTo(`export type PostPlusFragment = PostFragment & AnotherFragmentFragment;`);
     });
 
     it('Should handle "namespacedImportName" and "preResolveTypes" together', async () => {
