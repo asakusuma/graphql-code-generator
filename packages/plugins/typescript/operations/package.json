@@ -1,12 +1,13 @@
 {
   "name": "asa-graphql-ts-typescript-operations",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Fork of @graphql-codegen/typescript-operations",
   "repository": {
     "type": "git",
-    "url": "https://github.com/asakusuma/graphql-code-generator.git",
+    "url": "https://github.com/asa-graphql-codegen/graphql-code-generator.git",
     "directory": "packages/plugins/typescript/operations"
   },
+  "homepage": "https://github.com/asa-graphql-codegen/graphql-code-generator",
   "license": "MIT",
   "scripts": {
     "lint": "eslint **/*.ts",
