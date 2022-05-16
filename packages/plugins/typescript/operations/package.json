@@ -7,7 +7,7 @@
     "url": "https://github.com/asa-graphql-codegen/graphql-code-generator.git",
     "directory": "packages/plugins/typescript/operations"
   },
-  "homepage": "https://github.com/asa-graphql-codegen/graphql-code-generator",
+  "homepage": "https://github.com/asa-graphql-codegen/graphql-code-generator/tree/master/packages/plugins/typescript/operations",
   "license": "MIT",
   "scripts": {
     "lint": "eslint **/*.ts",
