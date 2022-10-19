@@ -1,7 +1,7 @@
 import { validateTs } from '@graphql-codegen/testing';
 import { parse, buildClientSchema, buildSchema } from 'graphql';
-import { plugin } from '../src/index';
-import { plugin as tsPlugin } from '../../typescript/src';
+import { plugin } from '../src/index.js';
+import { plugin as tsPlugin } from '../../typescript/src/index.js';
 import { mergeOutputs, Types } from '@graphql-codegen/plugin-helpers';
 
 describe('TypeScript Operations Plugin', () => {
@@ -2625,15 +2625,15 @@ describe('TypeScript Operations Plugin', () => {
 
        export type TestQuery = { __typename?: 'Query', notifications: Array<(
         { __typename?: 'TextNotification' }
-        & { ' $fragmentRefs': { 'N_TextNotification_Fragment': N_TextNotification_Fragment } }
+        & { ' $fragmentRefs'?: { 'N_TextNotification_Fragment': N_TextNotification_Fragment } }
        ) | (
         { __typename?: 'ImageNotification' }
-        & { ' $fragmentRefs': { 'N_ImageNotification_Fragment': N_ImageNotification_Fragment } }
+        & { ' $fragmentRefs'?: { 'N_ImageNotification_Fragment': N_ImageNotification_Fragment } }
        )> };
 
-       type N_TextNotification_Fragment = { __typename?: 'TextNotification', id: string } & { ' $fragmentName': 'N_TextNotification_Fragment' };
+       type N_TextNotification_Fragment = { __typename?: 'TextNotification', id: string } & { ' $fragmentName'?: 'N_TextNotification_Fragment' };
 
-       type N_ImageNotification_Fragment = { __typename?: 'ImageNotification', id: string } & { ' $fragmentName': 'N_ImageNotification_Fragment' };
+       type N_ImageNotification_Fragment = { __typename?: 'ImageNotification', id: string } & { ' $fragmentName'?: 'N_ImageNotification_Fragment' };
 
        export type NFragment = N_TextNotification_Fragment | N_ImageNotification_Fragment;
      `);
@@ -6046,20 +6046,20 @@ function test(q: GetEntityBrandDataQuery): void {
 
         export type GetPeopleQuery = { __typename?: 'Query', people: (
             { __typename?: 'Character' }
-            & { ' $fragmentRefs': { 'PeopleInfo_Character_Fragment': PeopleInfo_Character_Fragment } }
+            & { ' $fragmentRefs'?: { 'PeopleInfo_Character_Fragment': PeopleInfo_Character_Fragment } }
           ) | (
             { __typename?: 'Jedi' }
-            & { ' $fragmentRefs': { 'PeopleInfo_Jedi_Fragment': PeopleInfo_Jedi_Fragment } }
+            & { ' $fragmentRefs'?: { 'PeopleInfo_Jedi_Fragment': PeopleInfo_Jedi_Fragment } }
           ) | (
             { __typename?: 'Droid' }
-            & { ' $fragmentRefs': { 'PeopleInfo_Droid_Fragment': PeopleInfo_Droid_Fragment } }
+            & { ' $fragmentRefs'?: { 'PeopleInfo_Droid_Fragment': PeopleInfo_Droid_Fragment } }
           ) };
 
-        type PeopleInfo_Character_Fragment = { __typename?: 'Character', name?: string | null } & { ' $fragmentName': 'PeopleInfo_Character_Fragment' };
+        type PeopleInfo_Character_Fragment = { __typename?: 'Character', name?: string | null } & { ' $fragmentName'?: 'PeopleInfo_Character_Fragment' };
 
-        type PeopleInfo_Jedi_Fragment = { __typename?: 'Jedi', side?: string | null } & { ' $fragmentName': 'PeopleInfo_Jedi_Fragment' };
+        type PeopleInfo_Jedi_Fragment = { __typename?: 'Jedi', side?: string | null } & { ' $fragmentName'?: 'PeopleInfo_Jedi_Fragment' };
 
-        type PeopleInfo_Droid_Fragment = { __typename?: 'Droid', model?: string | null } & { ' $fragmentName': 'PeopleInfo_Droid_Fragment' };
+        type PeopleInfo_Droid_Fragment = { __typename?: 'Droid', model?: string | null } & { ' $fragmentName'?: 'PeopleInfo_Droid_Fragment' };
 
         export type PeopleInfoFragment = PeopleInfo_Character_Fragment | PeopleInfo_Jedi_Fragment | PeopleInfo_Droid_Fragment;
         "
@@ -6618,10 +6618,10 @@ function test(q: GetEntityBrandDataQuery): void {
 
         export type Unnamed_1_Query = { __typename?: 'Query', me?: (
             { __typename?: 'User' }
-            & { ' $fragmentRefs': { 'UserFragmentFragment': UserFragmentFragment } }
+            & { ' $fragmentRefs'?: { 'UserFragmentFragment': UserFragmentFragment } }
           ) | null };
 
-        export type UserFragmentFragment = { __typename?: 'User', id: string } & { ' $fragmentName': 'UserFragmentFragment' };
+        export type UserFragmentFragment = { __typename?: 'User', id: string } & { ' $fragmentName'?: 'UserFragmentFragment' };
       `);
     });
   });

@@ -1,4 +1,4 @@
-import { parseMapper, transformMappers } from '../src/mappers';
+import { parseMapper, transformMappers } from '../src/mappers.js';
 
 describe('parseMapper', () => {
   it('Should return the correct values for a simple named mapper', () => {
@@ -7,6 +7,15 @@ describe('parseMapper', () => {
     expect(result).toEqual({
       isExternal: false,
       type: 'MyType',
+    });
+  });
+
+  it('Should support a custom mapper with no imports', () => {
+    const result = parseMapper('CustomMergeTypeMapper<SomeType, SomeOtherType>', 'SomeType');
+
+    expect(result).toEqual({
+      isExternal: false,
+      type: 'CustomMergeTypeMapper<SomeType, SomeOtherType>',
     });
   });
 

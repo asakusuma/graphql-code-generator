@@ -27,11 +27,11 @@ import {
   DeclarationBlock,
   mergeSelectionSets,
   hasConditionalDirectives,
-} from './utils';
-import { NormalizedScalarsMap, ConvertNameFn, LoadedFragment, GetFragmentSuffixFn } from './types';
-import { BaseVisitorConvertOptions } from './base-visitor';
+} from './utils.js';
+import { NormalizedScalarsMap, ConvertNameFn, LoadedFragment, GetFragmentSuffixFn } from './types.js';
+import { BaseVisitorConvertOptions } from './base-visitor.js';
 import { getBaseType } from '@graphql-codegen/plugin-helpers';
-import { ParsedDocumentsConfig } from './base-documents-visitor';
+import { ParsedDocumentsConfig } from './base-documents-visitor.js';
 import {
   LinkField,
   PrimitiveAliasedFields,
@@ -39,7 +39,7 @@ import {
   BaseSelectionSetProcessor,
   ProcessResult,
   NameAndType,
-} from './selection-set-processor/base';
+} from './selection-set-processor/base.js';
 import autoBind from 'auto-bind';
 import { getRootTypes } from '@graphql-tools/utils';
 import { createHash } from 'crypto';
@@ -586,7 +586,7 @@ export class SelectionSetToObject<Config extends ParsedDocumentsConfig = ParsedD
       if (this._config.inlineFragmentTypes === 'combine') {
         fields.push(...fragmentsSpreadUsages);
       } else if (this._config.inlineFragmentTypes === 'mask') {
-        fields.push(`{ ' $fragmentRefs': { ${fragmentsSpreadUsages.map(name => `'${name}': ${name}`).join(`;`)} } }`);
+        fields.push(`{ ' $fragmentRefs'?: { ${fragmentsSpreadUsages.map(name => `'${name}': ${name}`).join(`;`)} } }`);
       }
     }
 
@@ -683,7 +683,7 @@ export class SelectionSetToObject<Config extends ParsedDocumentsConfig = ParsedD
 
     const fragmentTypeName = this.buildFragmentTypeName(fragmentName, fragmentSuffix);
     const fragmentMaskPartial =
-      this._config.inlineFragmentTypes === 'mask' ? ` & { ' $fragmentName': '${fragmentTypeName}' }` : '';
+      this._config.inlineFragmentTypes === 'mask' ? ` & { ' $fragmentName'?: '${fragmentTypeName}' }` : '';
 
     if (subTypes.length === 1) {
       return new DeclarationBlock(declarationBlockConfig)
@@ -701,7 +701,9 @@ export class SelectionSetToObject<Config extends ParsedDocumentsConfig = ParsedD
             .asKind('type')
             .withName(t.name)
             .withContent(
-              `${t.content}${this._config.inlineFragmentTypes === 'mask' ? ` & { ' $fragmentName': '${t.name}' }` : ''}`
+              `${t.content}${
+                this._config.inlineFragmentTypes === 'mask' ? ` & { ' $fragmentName'?: '${t.name}' }` : ''
+              }`
             ).string
       ),
       new DeclarationBlock(declarationBlockConfig)

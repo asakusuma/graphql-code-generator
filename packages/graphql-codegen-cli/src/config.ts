@@ -1,4 +1,5 @@
 import { cosmiconfig, defaultLoaders } from 'cosmiconfig';
+import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
 import { resolve } from 'path';
 import {
   DetailedError,
@@ -11,8 +12,8 @@ import {
 import { env } from 'string-env-interpolation';
 import yargs from 'yargs';
 import { GraphQLConfig } from 'graphql-config';
-import { findAndLoadGraphQLConfig } from './graphql-config';
-import { loadSchema, loadDocuments, defaultSchemaLoadOptions, defaultDocumentsLoadOptions } from './load';
+import { findAndLoadGraphQLConfig } from './graphql-config.js';
+import { loadSchema, loadDocuments, defaultSchemaLoadOptions, defaultDocumentsLoadOptions } from './load.js';
 import { GraphQLSchema, print, GraphQLSchemaExtensions } from 'graphql';
 import yaml from 'yaml';
 import { createRequire } from 'module';
@@ -20,6 +21,11 @@ import { promises } from 'fs';
 import { createHash } from 'crypto';
 
 const { lstat } = promises;
+
+// #8437: conflict with `graphql-config` also using TypeScriptLoader(), causing a double `ts-node` register.
+const tsLoader = TypeScriptLoader({ transpileOnly: true });
+
+export type CodegenConfig = Types.Config;
 
 export type YamlCliFlags = {
   config: string;
@@ -30,10 +36,15 @@ export type YamlCliFlags = {
   silent: boolean;
   errorsOnly: boolean;
   profile: boolean;
+  check?: boolean;
+  verbose?: boolean;
+  debug?: boolean;
+  ignoreNoDocuments?: boolean;
+  emitLegacyCommonJSImports?: boolean;
 };
 
 export function generateSearchPlaces(moduleName: string) {
-  const extensions = ['json', 'yaml', 'yml', 'js', 'config.js'];
+  const extensions = ['json', 'yaml', 'yml', 'js', 'ts', 'config.js'];
   // gives codegen.json...
   const regular = extensions.map(ext => `${moduleName}.${ext}`);
   // gives .codegenrc.json... but no .codegenrc.config.js
@@ -42,7 +53,7 @@ export function generateSearchPlaces(moduleName: string) {
   return [...regular.concat(dot), 'package.json'];
 }
 
-function customLoader(ext: 'json' | 'yaml' | 'js') {
+function customLoader(ext: 'json' | 'yaml' | 'js' | 'ts') {
   function loader(filepath: string, content: string) {
     if (typeof process !== 'undefined' && 'env' in process) {
       content = env(content);
@@ -64,6 +75,10 @@ function customLoader(ext: 'json' | 'yaml' | 'js') {
 
     if (ext === 'js') {
       return defaultLoaders['.js'](filepath, content);
+    }
+
+    if (ext === 'ts') {
+      return tsLoader(filepath, content);
     }
   }
 
@@ -119,6 +134,7 @@ export async function loadCodegenConfig({
       '.yaml': customLoader('yaml'),
       '.yml': customLoader('yaml'),
       '.js': customLoader('js'),
+      '.ts': customLoader('ts'),
       noExt: customLoader('yaml'),
       ...customLoaders,
     },
@@ -191,7 +207,7 @@ export function buildOptions() {
     w: {
       alias: 'watch',
       describe:
-        'Watch for changes and execute generation automatically. You can also specify a glob expreession for custom watch list.',
+        'Watch for changes and execute generation automatically. You can also specify a glob expression for custom watch list.',
       coerce: (watch: any) => {
         if (watch === 'false') {
           return false;
@@ -232,11 +248,23 @@ export function buildOptions() {
       describe: 'Name of a project in GraphQL Config',
       type: 'string' as const,
     },
+    v: {
+      alias: 'verbose',
+      describe: 'output more detailed information about performed tasks',
+      type: 'boolean' as const,
+      default: false,
+    },
+    d: {
+      alias: 'debug',
+      describe: 'Print debug logs to stdout',
+      type: 'boolean' as const,
+      default: false,
+    },
   };
 }
 
 export function parseArgv(argv = process.argv): YamlCliFlags {
-  return yargs.options(buildOptions()).parse(argv) as any;
+  return yargs(argv).options(buildOptions()).parse(argv) as any;
 }
 
 export async function createContext(cliFlags: YamlCliFlags = parseArgv(process.argv)): Promise<CodegenContext> {
@@ -265,7 +293,7 @@ export function updateContextWithCliFlags(context: CodegenContext, cliFlags: Yam
     configFilePath: context.filepath,
   };
 
-  if (cliFlags.watch) {
+  if (cliFlags.watch !== undefined) {
     config.watch = cliFlags.watch;
   }
 
@@ -277,8 +305,26 @@ export function updateContextWithCliFlags(context: CodegenContext, cliFlags: Yam
     config.silent = cliFlags.silent;
   }
 
+  if (cliFlags.verbose === true || process.env.VERBOSE) {
+    config.verbose = true;
+  }
+
+  if (cliFlags.debug === true || process.env.DEBUG) {
+    config.debug = true;
+  }
+
   if (cliFlags.errorsOnly === true) {
     config.errorsOnly = cliFlags.errorsOnly;
+  }
+
+  if (cliFlags['ignore-no-documents'] !== undefined) {
+    // for some reason parsed value is `'false'` string so this ensure it always is a boolean.
+    config.ignoreNoDocuments = cliFlags['ignore-no-documents'] === true;
+  }
+
+  if (cliFlags['emit-legacy-common-js-imports'] !== undefined) {
+    // for some reason parsed value is `'false'` string so this ensure it always is a boolean.
+    config.emitLegacyCommonJSImports = cliFlags['emit-legacy-common-js-imports'] === true;
   }
 
   if (cliFlags.project) {
@@ -289,6 +335,10 @@ export function updateContextWithCliFlags(context: CodegenContext, cliFlags: Yam
     context.useProfiler();
   }
 
+  if (cliFlags.check === true) {
+    context.enableCheckMode();
+  }
+
   context.updateConfig(config);
 }
 
@@ -297,12 +347,14 @@ export class CodegenContext {
   private _graphqlConfig?: GraphQLConfig;
   private config: Types.Config;
   private _project?: string;
+  private _checkMode = false;
   private _pluginContext: { [key: string]: any } = {};
 
   cwd: string;
   filepath: string;
   profiler: Profiler;
   profilerOutput?: string;
+  checkModeStaleFiles = [];
 
   constructor({
     config,
@@ -351,6 +403,14 @@ export class CodegenContext {
       ...this.getConfig(),
       ...config,
     };
+  }
+
+  enableCheckMode() {
+    this._checkMode = true;
+  }
+
+  get checkMode() {
+    return this._checkMode;
   }
 
   useProfiler() {
@@ -432,4 +492,20 @@ function addHashToDocumentFiles(documentFilesPromise: Promise<Types.DocumentFile
       return doc;
     })
   );
+}
+
+export function shouldEmitLegacyCommonJSImports(config: Types.Config, outputPath: string): boolean {
+  const globalValue = config.emitLegacyCommonJSImports === undefined ? true : !!config.emitLegacyCommonJSImports;
+  // const outputConfig = config.generates[outputPath];
+
+  // if (!outputConfig) {
+  //   debugLog(`Couldn't find a config of ${outputPath}`);
+  //   return globalValue;
+  // }
+
+  // if (isConfiguredOutput(outputConfig) && typeof outputConfig.emitLegacyCommonJSImports === 'boolean') {
+  //   return outputConfig.emitLegacyCommonJSImports;
+  // }
+
+  return globalValue;
 }

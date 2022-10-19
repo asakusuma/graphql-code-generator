@@ -1,5 +1,5 @@
 const { resolve } = require('path');
-const { pathsToModuleNameMapper } = require('ts-jest/utils');
+const { pathsToModuleNameMapper } = require('ts-jest');
 
 const ROOT_DIR = __dirname;
 const TSCONFIG = resolve(ROOT_DIR, 'tsconfig.json');
@@ -16,11 +16,15 @@ module.exports = ({ dirname, projectMode = true }) => {
     rootDir: dirname,
     restoreMocks: true,
     reporters: ['default'],
-    modulePathIgnorePatterns: ['dist'],
+    modulePathIgnorePatterns: ['dist', '.bob'],
     moduleNameMapper: pathsToModuleNameMapper(tsconfig.compilerOptions.paths, { prefix: `${ROOT_DIR}/` }),
     cacheDirectory: resolve(ROOT_DIR, `${CI ? '' : 'node_modules/'}.cache/jest`),
     setupFiles: [`${ROOT_DIR}/dev-test/setup.js`],
     collectCoverage: false,
     testTimeout: 20000,
+    resolver: 'bob-the-bundler/jest-resolver.js',
+    snapshotFormat: {
+      escapeString: false,
+    },
   };
 };
