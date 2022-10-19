@@ -1,6 +1,7 @@
 import { GraphQLSchema, DocumentNode } from 'graphql';
 import { Source } from '@graphql-tools/utils';
-import type { Profiler } from './profiler';
+import type { Profiler } from './profiler.js';
+import type { ApolloEngineOptions } from '@graphql-tools/apollo-engine-loader';
 
 export namespace Types {
   export interface GenerateOptions {
@@ -177,6 +178,10 @@ export namespace Types {
     [globPath: string]: LocalSchemaPathOptions;
   }
 
+  export interface ApolloEngineSchemaOptions {
+    'apollo-engine': ApolloEngineOptions;
+  }
+
   export type SchemaGlobPath = string;
   /**
    * @description A URL to your GraphQL endpoint, a local path to `.graphql` file, a glob pattern to your GraphQL schema files, or a JavaScript file that exports the schema to generate code from. This can also be an array which specifies multiple schemas to generate code from. You can read more about the supported formats [here](schema-field#available-formats).
@@ -184,6 +189,7 @@ export namespace Types {
   export type Schema =
     | string
     | UrlSchemaWithOptions
+    | ApolloEngineSchemaOptions
     | LocalSchemaPathWithOptions
     | SchemaGlobPath
     | SchemaWithLoader
@@ -218,6 +224,14 @@ export namespace Types {
   export type NamedPreset = string;
   export type OutputConfig = NamedPlugin | ConfiguredPlugin;
 
+  export type PresetNamesBase =
+    | 'client'
+    | 'near-operation-file'
+    | 'gql-tag-operations'
+    | 'graphql-modules'
+    | 'import-types';
+  export type PresetNames = `${PresetNamesBase}-preset` | PresetNamesBase;
+
   /**
    * @additionalProperties false
    */
@@ -242,7 +256,7 @@ export namespace Types {
      *
      * List of available presets: https://graphql-code-generator.com/docs/presets/presets-index
      */
-    preset?: string | OutputPreset;
+    preset?: PresetNames | OutputPreset;
     /**
      * @description If your setup uses Preset to have a more dynamic setup and output, set the configuration object of your preset here.
      *
@@ -330,6 +344,10 @@ export namespace Types {
 
   export type OutputPreset<TPresetConfig = any> = {
     buildGeneratesSection: (options: PresetFnArgs<TPresetConfig>) => Promisable<GenerateOptions[]>;
+    prepareDocuments?: (
+      outputFilePath: string,
+      outputSpecificDocuments: Types.OperationDocument[]
+    ) => Promisable<Types.OperationDocument[]>;
   };
 
   /* Require Extensions */
@@ -434,9 +452,25 @@ export namespace Types {
       interval?: number;
     };
     /**
+     * @description A flag to suppress non-zero exit code when there are no documents to generate.
+     */
+    ignoreNoDocuments?: boolean;
+    /**
+     * @description A flag to disable adding `.js` extension to the output file. Default: `true`.
+     */
+    emitLegacyCommonJSImports?: boolean;
+    /**
      * @description A flag to suppress printing errors when they occur.
      */
     silent?: boolean;
+    /**
+     * @description A flag to output more detailed information about tasks
+     */
+    verbose?: boolean;
+    /**
+     * @description A flag to output debug logs
+     */
+    debug?: boolean;
     /**
      * @description A flag to print only errors.
      */

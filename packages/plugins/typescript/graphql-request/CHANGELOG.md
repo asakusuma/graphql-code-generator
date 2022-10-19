@@ -1,5 +1,98 @@
 # @graphql-codegen/typescript-graphql-request
 
+## 4.5.6
+
+### Patch Changes
+
+- Updated dependencies [[`1bd7f771c`](https://github.com/dotansimha/graphql-code-generator/commit/1bd7f771ccb949a5a37395c7c57cb41c19340714)]:
+  - @graphql-codegen/visitor-plugin-common@2.12.2
+
+## 4.5.5
+
+### Patch Changes
+
+- [#8334](https://github.com/dotansimha/graphql-code-generator/pull/8334) [`e6e497afa`](https://github.com/dotansimha/graphql-code-generator/commit/e6e497afa54213ad3eabfae26c014ab03eb4727c) Thanks [@jcarrus](https://github.com/jcarrus)! - graphql-request: append explicit extension when importing dom types
+
+- Updated dependencies [[`4113b1bd3`](https://github.com/dotansimha/graphql-code-generator/commit/4113b1bd39f3d32759c68a292e8492a0dd4f7371)]:
+  - @graphql-codegen/plugin-helpers@2.7.1
+
+## 4.5.4
+
+### Patch Changes
+
+- [#8295](https://github.com/dotansimha/graphql-code-generator/pull/8295) [`a18818118`](https://github.com/dotansimha/graphql-code-generator/commit/a18818118c11d834ae41edbd172dbc259817fcb6) Thanks [@renovate](https://github.com/apps/renovate)! - dependencies updates:
+
+  - Updated dependency [`graphql-request@^3.4.0 || ^4.0.0 || ^5.0.0` ↗︎](https://www.npmjs.com/package/graphql-request/v/null) (from `^3.4.0 || ^4.0.0`, in `peerDependencies`)
+
+- Updated dependencies [[`2ed21a471`](https://github.com/dotansimha/graphql-code-generator/commit/2ed21a471f8de58ecafebf4bf64b3c32cee24d2f)]:
+  - @graphql-codegen/plugin-helpers@2.7.0
+
+## 4.5.3
+
+### Patch Changes
+
+- [#8189](https://github.com/dotansimha/graphql-code-generator/pull/8189) [`b408f8238`](https://github.com/dotansimha/graphql-code-generator/commit/b408f8238c00bbb4cd448501093856c06cfde50f) Thanks [@n1ru4l](https://github.com/n1ru4l)! - Fix CommonJS TypeScript resolution with `moduleResolution` `node16` or `nodenext`
+
+- Updated dependencies [[`b408f8238`](https://github.com/dotansimha/graphql-code-generator/commit/b408f8238c00bbb4cd448501093856c06cfde50f), [`47d0a57e2`](https://github.com/dotansimha/graphql-code-generator/commit/47d0a57e27dd0d2334670bfc6c81c45e00ff4e74)]:
+  - @graphql-codegen/visitor-plugin-common@2.12.1
+  - @graphql-codegen/plugin-helpers@2.6.2
+
+## 4.5.2
+
+### Patch Changes
+
+- Updated dependencies [2cbcbb371]
+  - @graphql-codegen/visitor-plugin-common@2.12.0
+  - @graphql-codegen/plugin-helpers@2.6.0
+
+## 4.5.1
+
+### Patch Changes
+
+- Updated dependencies [525ad580b]
+  - @graphql-codegen/visitor-plugin-common@2.11.1
+
+## 4.5.0
+
+### Minor Changes
+
+- d84afec09: Support TypeScript ESM modules (`"module": "node16"` and `"moduleResolution": "node16"`).
+
+  [More information on the TypeScript Release Notes.](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#ecmascript-module-support-in-node-js)
+
+### Patch Changes
+
+- 28f834614: Honor importOperationTypesFrom config option
+- Updated dependencies [68bb30e19]
+- Updated dependencies [d84afec09]
+- Updated dependencies [a4fe5006b]
+- Updated dependencies [8e44df58b]
+  - @graphql-codegen/visitor-plugin-common@2.11.0
+  - @graphql-codegen/plugin-helpers@2.5.0
+
+## 4.4.11
+
+### Patch Changes
+
+- Updated dependencies [aa1e6eafd]
+- Updated dependencies [a42fcbfe4]
+- Updated dependencies [8b10f22be]
+  - @graphql-codegen/visitor-plugin-common@2.10.0
+
+## 4.4.10
+
+### Patch Changes
+
+- Updated dependencies [d16bebacb]
+  - @graphql-codegen/visitor-plugin-common@2.9.1
+
+## 4.4.9
+
+### Patch Changes
+
+- Updated dependencies [c3d7b7226]
+  - @graphql-codegen/visitor-plugin-common@2.9.0
+
 ## 4.4.8
 
 ### Patch Changes

@@ -20,9 +20,9 @@ import {
   Kind,
   GraphQLEnumType,
 } from 'graphql';
-import { BaseVisitor, ParsedConfig, RawConfig } from './base-visitor';
-import { DEFAULT_SCALARS } from './scalars';
-import { normalizeDeclarationKind } from './declaration-kinds';
+import { BaseVisitor, ParsedConfig, RawConfig } from './base-visitor.js';
+import { DEFAULT_SCALARS } from './scalars.js';
+import { normalizeDeclarationKind } from './declaration-kinds.js';
 import {
   EnumValuesMap,
   NormalizedScalarsMap,
@@ -31,7 +31,7 @@ import {
   ParsedEnumValuesMap,
   DirectiveArgumentAndInputFieldMappings,
   ParsedDirectiveArgumentAndInputFieldMappings,
-} from './types';
+} from './types.js';
 import {
   transformComment,
   DeclarationBlock,
@@ -40,10 +40,11 @@ import {
   wrapWithSingleQuotes,
   getConfigValue,
   buildScalarsFromConfig,
-} from './utils';
-import { OperationVariablesToObject } from './variables-to-object';
-import { parseEnumValues } from './enum-values';
-import { transformDirectiveArgumentAndInputFieldMappings } from './mappers';
+  isOneOfInputObjectType,
+} from './utils.js';
+import { OperationVariablesToObject } from './variables-to-object.js';
+import { parseEnumValues } from './enum-values.js';
+import { transformDirectiveArgumentAndInputFieldMappings } from './mappers.js';
 
 export interface ParsedTypesConfig extends ParsedConfig {
   enumValues: ParsedEnumValuesMap;
@@ -67,9 +68,21 @@ export interface RawTypesConfig extends RawConfig {
    * @exampleMarkdown
    * ## With Custom Values
    *
-   * ```yaml
-   *   config:
-   *     addUnderscoreToArgsType: true
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          addUnderscoreToArgsType: true
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   addUnderscoreToArgsType?: boolean;
@@ -79,24 +92,65 @@ export interface RawTypesConfig extends RawConfig {
    *
    * @exampleMarkdown
    * ## With Custom Values
-   * ```yaml
-   *   config:
-   *     enumValues:
-   *       MyEnum:
-   *         A: 'foo'
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          enumValues: {
+   *            MyEnum: {
+   *              A: 'foo'
+   *            }
+   *          }
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    * ## With External Enum
-   * ```yaml
-   *   config:
-   *     enumValues:
-   *       MyEnum: ./my-file#MyCustomEnum
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          enumValues: {
+   *            MyEnum: './my-file#MyCustomEnum',
+   *          }
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    * ## Import All Enums from a file
-   * ```yaml
-   *   config:
-   *     enumValues: ./my-file
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          enumValues: {
+   *            MyEnum: './my-file',
+   *          }
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   enumValues?: EnumValuesMap;
@@ -106,18 +160,43 @@ export interface RawTypesConfig extends RawConfig {
    * @exampleMarkdown
    * ## Override all declarations
    *
-   * ```yaml
-   *   config:
-   *     declarationKind: 'interface'
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          declarationKind: 'interface'
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    * ## Override only specific declarations
    *
-   * ```yaml
-   *   config:
-   *     declarationKind:
-   *       type: 'interface'
-   *       input: 'interface'
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          declarationKind: {
+   *            type: 'interface',
+   *            input: 'interface'
+   *          }
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   declarationKind?: DeclarationKind | DeclarationKindConfig;
@@ -128,10 +207,22 @@ export interface RawTypesConfig extends RawConfig {
    * @exampleMarkdown
    * ## Disable enum prefixes
    *
-   * ```yaml
-   *   config:
-   *     typesPrefix: I
-   *     enumPrefix: false
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          typesPrefix: 'I',
+   *          enumPrefix: false
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   enumPrefix?: boolean;
@@ -142,14 +233,22 @@ export interface RawTypesConfig extends RawConfig {
    * @exampleMarkdown
    * ## Allow Promise
    *
-   * ```yaml
-   * generates:
-   *   path/to/file.ts:
-   *     plugins:
-   *       - typescript
-   *     config:
-   *       wrapFieldDefinitions: true
-   *       fieldWrapperValue: T | Promise<T>
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          wrapFieldDefinitions: true,
+   *          fieldWrapperValue: 'T | Promise<T>',
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   fieldWrapperValue?: string;
@@ -161,13 +260,21 @@ export interface RawTypesConfig extends RawConfig {
    * @exampleMarkdown
    * ## Enable wrapping fields
    *
-   * ```yaml
-   * generates:
-   *   path/to/file.ts:
-   *     plugins:
-   *       - typescript
-   *     config:
-   *       wrapFieldDefinitions: true
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          wrapFieldDefinitions: true,
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   wrapFieldDefinitions?: boolean;
@@ -178,13 +285,21 @@ export interface RawTypesConfig extends RawConfig {
    * @exampleMarkdown
    * ## Override all definition types
    *
-   * ```yml
-   * generates:
-   *   path/to/file.ts:
-   *     plugins:
-   *       - typescript
-   *     config:
-   *       onlyEnums: true
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          onlyEnums: true,
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   onlyEnums?: boolean;
@@ -195,13 +310,21 @@ export interface RawTypesConfig extends RawConfig {
    * @exampleMarkdown
    * ## Override all definition types
    *
-   * ```yaml
-   * generates:
-   *   path/to/file.ts:
-   *     plugins:
-   *       - typescript
-   *     config:
-   *       onlyOperationTypes: true
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          onlyOperationTypes: true,
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   onlyOperationTypes?: boolean;
@@ -212,13 +335,21 @@ export interface RawTypesConfig extends RawConfig {
    * @exampleMarkdown
    * ## Ignore enum values from schema
    *
-   * ```yaml
-   * generates:
-   *   path/to/file.ts:
-   *     plugins:
-   *       - typescript
-   *     config:
-   *       ignoreEnumValuesFromSchema: true
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          ignoreEnumValuesFromSchema: true,
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   ignoreEnumValuesFromSchema?: boolean;
@@ -232,13 +363,21 @@ export interface RawTypesConfig extends RawConfig {
    * @default true
    *
    * @example Enable wrapping entire fields
-   * ```yaml
-   * generates:
-   * path/to/file.ts:
-   *  plugins:
-   *    - typescript
-   *  config:
-   *    wrapEntireFieldDefinitions: false
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          wrapEntireFieldDefinitions: false,
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   wrapEntireFieldDefinitions?: boolean;
@@ -250,13 +389,21 @@ export interface RawTypesConfig extends RawConfig {
    * @default T | Promise<T> | (() => T | Promise<T>)
    *
    * @example Only allow values
-   * ```yaml
-   * generates:
-   * path/to/file.ts:
-   *  plugins:
-   *    - typescript
-   *  config:
-   *    entireFieldWrapperValue: T
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          entireFieldWrapperValue: 'T',
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   entireFieldWrapperValue?: string;
@@ -275,13 +422,25 @@ export interface RawTypesConfig extends RawConfig {
    * Please use this configuration option with care!
    *
    * @exampleMarkdown
-   * ## Custom Context Type
-   * ```yaml
-   * plugins:
-   *   config:
-   *     directiveArgumentAndInputFieldMappings:
-   *       AsNumber: number
-   *       AsComplex: ./my-models#Complex
+   * ## Custom Context Type\
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          directiveArgumentAndInputFieldMappings: {
+   *            AsNumber: 'number',
+   *            AsComplex: './my-models#Complex',
+   *          }
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   directiveArgumentAndInputFieldMappings?: DirectiveArgumentAndInputFieldMappings;
@@ -289,10 +448,21 @@ export interface RawTypesConfig extends RawConfig {
    * @description Adds a suffix to the imported names to prevent name clashes.
    *
    * @exampleMarkdown
-   * ```yaml
-   * plugins:
-   *   config:
-   *     directiveArgumentAndInputFieldMappingTypeSuffix: Model
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          directiveArgumentAndInputFieldMappings: 'Model'
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   directiveArgumentAndInputFieldMappingTypeSuffix?: string;
@@ -453,8 +623,22 @@ export class BaseTypesVisitor<
       .withBlock(node.fields.join('\n'));
   }
 
+  getInputObjectOneOfDeclarationBlock(node: InputObjectTypeDefinitionNode): DeclarationBlock {
+    return new DeclarationBlock(this._declarationBlockConfig)
+      .export()
+      .asKind(this._parsedConfig.declarationKind.input)
+      .withName(this.convertName(node))
+      .withComment(node.description as any as string)
+      .withContent(`\n` + node.fields.join('\n  |'));
+  }
+
   InputObjectTypeDefinition(node: InputObjectTypeDefinitionNode): string {
     if (this.config.onlyEnums) return '';
+
+    // Why the heck is node.name a string and not { value: string } at runtime ?!
+    if (isOneOfInputObjectType(this._schema.getType(node.name as unknown as string))) {
+      return this.getInputObjectOneOfDeclarationBlock(node).string;
+    }
 
     return this.getInputObjectDeclarationBlock(node).string;
   }
@@ -819,7 +1003,7 @@ export class BaseTypesVisitor<
     return null;
   }
 
-  getNodeComment(node: FieldDefinitionNode | EnumValueDefinitionNode): string {
+  getNodeComment(node: FieldDefinitionNode | EnumValueDefinitionNode | InputValueDefinitionNode): string {
     let commentText: string = node.description as any;
     const deprecationDirective = node.directives.find((v: any) => v.name === 'deprecated');
     if (deprecationDirective) {

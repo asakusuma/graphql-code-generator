@@ -1,5 +1,225 @@
 # @graphql-cli/codegen
 
+## 2.4.10
+
+### Patch Changes
+
+- Updated dependencies [[`8473682c4`](https://github.com/dotansimha/graphql-code-generator/commit/8473682c48559382b0a3edd4a494aeaf1c5b99ff)]:
+  - @graphql-codegen/cli@2.13.7
+
+## 2.4.9
+
+### Patch Changes
+
+- Updated dependencies [[`c4d9566c7`](https://github.com/dotansimha/graphql-code-generator/commit/c4d9566c792413fa26a537bce268a547c61e5f13)]:
+  - @graphql-codegen/cli@2.13.6
+
+## 2.4.8
+
+### Patch Changes
+
+- Updated dependencies [[`cb1f93618`](https://github.com/dotansimha/graphql-code-generator/commit/cb1f93618b3c92cd092b740973d2469c232c2c00), [`cb1f93618`](https://github.com/dotansimha/graphql-code-generator/commit/cb1f93618b3c92cd092b740973d2469c232c2c00)]:
+  - @graphql-codegen/cli@2.13.5
+
+## 2.4.7
+
+### Patch Changes
+
+- Updated dependencies [[`6785f7f0d`](https://github.com/dotansimha/graphql-code-generator/commit/6785f7f0df6b3eb14d30abf37924791c45a4d586), [`6785f7f0d`](https://github.com/dotansimha/graphql-code-generator/commit/6785f7f0df6b3eb14d30abf37924791c45a4d586)]:
+  - @graphql-codegen/cli@2.13.4
+
+## 2.4.6
+
+### Patch Changes
+
+- Updated dependencies [[`15d500776`](https://github.com/dotansimha/graphql-code-generator/commit/15d50077680ff96a8d09cc65acd2f82683e67fb5), [`15d500776`](https://github.com/dotansimha/graphql-code-generator/commit/15d50077680ff96a8d09cc65acd2f82683e67fb5)]:
+  - @graphql-codegen/cli@2.13.3
+
+## 2.4.5
+
+### Patch Changes
+
+- Updated dependencies [[`5524ac447`](https://github.com/dotansimha/graphql-code-generator/commit/5524ac447612ff05bfd68f4b758dfcd0fa9e7356)]:
+  - @graphql-codegen/cli@2.13.2
+
+## 2.4.4
+
+### Patch Changes
+
+- Updated dependencies [[`7f7e52bc2`](https://github.com/dotansimha/graphql-code-generator/commit/7f7e52bc22749d1dd6946510856103ab683a1807), [`7f7e52bc2`](https://github.com/dotansimha/graphql-code-generator/commit/7f7e52bc22749d1dd6946510856103ab683a1807)]:
+  - @graphql-codegen/cli@2.13.1
+
+## 2.4.3
+
+### Patch Changes
+
+- Updated dependencies [[`876844e76`](https://github.com/dotansimha/graphql-code-generator/commit/876844e7644a917172f09b3c4eb54a2f4c90e4c6), [`876844e76`](https://github.com/dotansimha/graphql-code-generator/commit/876844e7644a917172f09b3c4eb54a2f4c90e4c6)]:
+  - @graphql-codegen/cli@2.13.0
+
+## 2.4.2
+
+### Patch Changes
+
+- Updated dependencies [[`9d3eedaea`](https://github.com/dotansimha/graphql-code-generator/commit/9d3eedaea6a5a505a8f693378bed44a1648a3a37)]:
+  - @graphql-codegen/cli@2.12.2
+
+## 2.4.1
+
+### Patch Changes
+
+- Updated dependencies [[`3e121d92e`](https://github.com/dotansimha/graphql-code-generator/commit/3e121d92ebd563a82dbc367cd3e9194ebe5ca1ee), [`4113b1bd3`](https://github.com/dotansimha/graphql-code-generator/commit/4113b1bd39f3d32759c68a292e8492a0dd4f7371)]:
+  - @graphql-codegen/cli@2.12.1
+
+## 2.4.0
+
+### Minor Changes
+
+- [#8301](https://github.com/dotansimha/graphql-code-generator/pull/8301) [`2ed21a471`](https://github.com/dotansimha/graphql-code-generator/commit/2ed21a471f8de58ecafebf4bf64b3c32cee24d2f) Thanks [@charlypoly](https://github.com/charlypoly)! - Introduces support for TypeScript config file and a new preset lifecycle (required for `client-preset`)
+
+### Patch Changes
+
+- Updated dependencies [[`d8b4012e1`](https://github.com/dotansimha/graphql-code-generator/commit/d8b4012e1fdbdcff6f9e62365b57426cef578d9a), [`2ed21a471`](https://github.com/dotansimha/graphql-code-generator/commit/2ed21a471f8de58ecafebf4bf64b3c32cee24d2f), [`2ed21a471`](https://github.com/dotansimha/graphql-code-generator/commit/2ed21a471f8de58ecafebf4bf64b3c32cee24d2f)]:
+  - @graphql-codegen/cli@2.12.0
+
+## 2.3.13
+
+### Patch Changes
+
+- Updated dependencies [[`b5897fcad`](https://github.com/dotansimha/graphql-code-generator/commit/b5897fcad2832d9ffbed0eb2f59e6b7535f4b61c), [`b5897fcad`](https://github.com/dotansimha/graphql-code-generator/commit/b5897fcad2832d9ffbed0eb2f59e6b7535f4b61c)]:
+  - @graphql-codegen/cli@2.11.8
+
+## 2.3.12
+
+### Patch Changes
+
+- Updated dependencies [[`b18a0319f`](https://github.com/dotansimha/graphql-code-generator/commit/b18a0319f5f24f2675df8d12d9b440b67b0445bf)]:
+  - @graphql-codegen/cli@2.11.7
+
+## 2.3.11
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @graphql-codegen/cli@2.11.6
+
+## 2.3.10
+
+### Patch Changes
+
+- Updated dependencies [[`1c7a8c0ad`](https://github.com/dotansimha/graphql-code-generator/commit/1c7a8c0ade2cd1f505b303c742aa31b4489cc12d)]:
+  - @graphql-codegen/cli@2.11.5
+
+## 2.3.9
+
+### Patch Changes
+
+- [#8189](https://github.com/dotansimha/graphql-code-generator/pull/8189) [`b408f8238`](https://github.com/dotansimha/graphql-code-generator/commit/b408f8238c00bbb4cd448501093856c06cfde50f) Thanks [@n1ru4l](https://github.com/n1ru4l)! - Fix CommonJS TypeScript resolution with `moduleResolution` `node16` or `nodenext`
+
+- Updated dependencies [[`b408f8238`](https://github.com/dotansimha/graphql-code-generator/commit/b408f8238c00bbb4cd448501093856c06cfde50f)]:
+  - @graphql-codegen/cli@2.11.4
+
+## 2.3.8
+
+### Patch Changes
+
+- Updated dependencies [b75ca4b48]
+  - @graphql-codegen/cli@2.11.3
+
+## 2.3.7
+
+### Patch Changes
+
+- Updated dependencies [8cd1526c4]
+  - @graphql-codegen/cli@2.11.2
+
+## 2.3.6
+
+### Patch Changes
+
+- Updated dependencies [20bf4b225]
+  - @graphql-codegen/cli@2.11.1
+
+## 2.3.5
+
+### Patch Changes
+
+- Updated dependencies [6a2e328e6]
+- Updated dependencies [fd6be805b]
+  - @graphql-codegen/cli@2.11.0
+
+## 2.3.4
+
+### Patch Changes
+
+- Updated dependencies [273ad602f]
+- Updated dependencies [cc18923d3]
+  - @graphql-codegen/cli@2.10.0
+
+## 2.3.3
+
+### Patch Changes
+
+- Updated dependencies [e2cfc5c36]
+  - @graphql-codegen/cli@2.9.1
+
+## 2.3.2
+
+### Patch Changes
+
+- Updated dependencies [32c1560f1]
+- Updated dependencies [2cbcbb371]
+  - @graphql-codegen/cli@2.9.0
+
+## 2.3.1
+
+### Patch Changes
+
+- Updated dependencies [147e801bf]
+  - @graphql-codegen/cli@2.8.1
+
+## 2.3.0
+
+### Minor Changes
+
+- d84afec09: Support TypeScript ESM modules (`"module": "node16"` and `"moduleResolution": "node16"`).
+
+  [More information on the TypeScript Release Notes.](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#ecmascript-module-support-in-node-js)
+
+### Patch Changes
+
+- Updated dependencies [d84afec09]
+- Updated dependencies [e7870ac28]
+- Updated dependencies [d84afec09]
+- Updated dependencies [dce40edeb]
+- Updated dependencies [8e44df58b]
+- Updated dependencies [2e86ecb65]
+  - @graphql-codegen/cli@2.8.0
+
+## 2.2.6
+
+### Patch Changes
+
+- Updated dependencies [e050230c0]
+- Updated dependencies [dfd9f07dc]
+- Updated dependencies [2fb1d8b87]
+- Updated dependencies [4dce44263]
+  - @graphql-codegen/cli@2.7.0
+
+## 2.2.5
+
+### Patch Changes
+
+- Updated dependencies [92f714278]
+  - @graphql-codegen/cli@2.6.4
+
+## 2.2.4
+
+### Patch Changes
+
+- Updated dependencies [c1fe7758a]
+- Updated dependencies [52b41e90e]
+  - @graphql-codegen/cli@2.6.3
+
 ## 2.2.3
 
 ### Patch Changes
