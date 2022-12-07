@@ -2,7 +2,6 @@ import { cosmiconfig, defaultLoaders } from 'cosmiconfig';
 import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
 import { resolve } from 'path';
 import {
-  DetailedError,
   Types,
   Profiler,
   createProfiler,
@@ -21,9 +20,6 @@ import { promises } from 'fs';
 import { createHash } from 'crypto';
 
 const { lstat } = promises;
-
-// #8437: conflict with `graphql-config` also using TypeScriptLoader(), causing a double `ts-node` register.
-const tsLoader = TypeScriptLoader({ transpileOnly: true });
 
 export type CodegenConfig = Types.Config;
 
@@ -78,6 +74,8 @@ function customLoader(ext: 'json' | 'yaml' | 'js' | 'ts') {
     }
 
     if (ext === 'ts') {
+      // #8437: conflict with `graphql-config` also using TypeScriptLoader(), causing a double `ts-node` register.
+      const tsLoader = TypeScriptLoader({ transpileOnly: true });
       return tsLoader(filepath, content);
     }
   }
@@ -156,8 +154,7 @@ export async function loadContext(configFilePath?: string): Promise<CodegenConte
 
   if (!result) {
     if (configFilePath) {
-      throw new DetailedError(
-        `Config ${configFilePath} does not exist`,
+      throw new Error(
         `
         Config ${configFilePath} does not exist.
 
@@ -168,18 +165,16 @@ export async function loadContext(configFilePath?: string): Promise<CodegenConte
       );
     }
 
-    throw new DetailedError(
-      `Unable to find Codegen config file!`,
-      `
+    throw new Error(
+      `Unable to find Codegen config file! \n
         Please make sure that you have a configuration file under the current directory!
       `
     );
   }
 
   if (result.isEmpty) {
-    throw new DetailedError(
-      `Found Codegen config file but it was empty!`,
-      `
+    throw new Error(
+      `Found Codegen config file but it was empty! \n
         Please make sure that you have a valid configuration file under the current directory!
       `
     );

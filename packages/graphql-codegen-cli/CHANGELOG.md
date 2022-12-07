@@ -1,5 +1,75 @@
 # @graphql-codegen/cli
 
+## 2.15.0
+
+### Minor Changes
+
+- [#8590](https://github.com/dotansimha/graphql-code-generator/pull/8590) [`2c7fa51c6`](https://github.com/dotansimha/graphql-code-generator/commit/2c7fa51c628a0337f2abfe1b91fe00c6d5fbe749) Thanks [@Diizzayy](https://github.com/Diizzayy)! - register TypeScriptLoader when needed
+
+## 2.14.1
+
+### Patch Changes
+
+- [#8642](https://github.com/dotansimha/graphql-code-generator/pull/8642) [`5afa923e8`](https://github.com/dotansimha/graphql-code-generator/commit/5afa923e8e4e8db9bbd602e8abf6a193761a282d) Thanks [@jantimon](https://github.com/jantimon)! - faster type generation
+
+- [#8653](https://github.com/dotansimha/graphql-code-generator/pull/8653) [`d0bc51283`](https://github.com/dotansimha/graphql-code-generator/commit/d0bc51283bb7e496f8933511a8ff5ac2ba547bc8) Thanks [@saihaj](https://github.com/saihaj)! - fix bad concurrency config
+
+## 2.14.0
+
+### Minor Changes
+
+- [#8647](https://github.com/dotansimha/graphql-code-generator/pull/8647) [`40a6761a6`](https://github.com/dotansimha/graphql-code-generator/commit/40a6761a602fca592c6f4f0653c819e8debe007b) Thanks [@charlypoly](https://github.com/charlypoly)! - Enable support for loading TS files with import assertions
+
+### Patch Changes
+
+- [#8647](https://github.com/dotansimha/graphql-code-generator/pull/8647) [`40a6761a6`](https://github.com/dotansimha/graphql-code-generator/commit/40a6761a602fca592c6f4f0653c819e8debe007b) Thanks [@charlypoly](https://github.com/charlypoly)! - dependencies updates:
+  - Updated dependency [`@graphql-tools/code-file-loader@^7.3.13` ↗︎](https://www.npmjs.com/package/@graphql-tools/code-file-loader/v/7.3.13) (from `^7.3.1`, in `dependencies`)
+  - Updated dependency [`@graphql-tools/git-loader@^7.2.13` ↗︎](https://www.npmjs.com/package/@graphql-tools/git-loader/v/7.2.13) (from `^7.2.1`, in `dependencies`)
+  - Updated dependency [`@graphql-tools/github-loader@^7.3.20` ↗︎](https://www.npmjs.com/package/@graphql-tools/github-loader/v/7.3.20) (from `^7.3.6`, in `dependencies`)
+
+## 2.13.12
+
+### Patch Changes
+
+- Updated dependencies [[`45eb2b18a`](https://github.com/dotansimha/graphql-code-generator/commit/45eb2b18adf25366248bf8d67ef696431db5ee0e), [`45eb2b18a`](https://github.com/dotansimha/graphql-code-generator/commit/45eb2b18adf25366248bf8d67ef696431db5ee0e)]:
+  - @graphql-codegen/core@2.6.6
+
+## 2.13.11
+
+### Patch Changes
+
+- [#8556](https://github.com/dotansimha/graphql-code-generator/pull/8556) [`64e553c3f`](https://github.com/dotansimha/graphql-code-generator/commit/64e553c3f62618a2aedf122d292e2700fd93d6e1) Thanks [@charlypoly](https://github.com/charlypoly)! - dependencies updates:
+  - Updated dependency [`@graphql-codegen/core@2.6.4` ↗︎](https://www.npmjs.com/package/@graphql-codegen/core/v/2.6.4) (from `2.6.3`, in `dependencies`)
+- Updated dependencies [[`64e553c3f`](https://github.com/dotansimha/graphql-code-generator/commit/64e553c3f62618a2aedf122d292e2700fd93d6e1)]:
+  - @graphql-codegen/core@2.6.5
+
+## 2.13.10
+
+### Patch Changes
+
+- Updated dependencies [[`516170ef6`](https://github.com/dotansimha/graphql-code-generator/commit/516170ef6cb636c950d560ddf12fa1d2f7ee1c57), [`516170ef6`](https://github.com/dotansimha/graphql-code-generator/commit/516170ef6cb636c950d560ddf12fa1d2f7ee1c57)]:
+  - @graphql-codegen/core@2.6.4
+
+## 2.13.9
+
+### Patch Changes
+
+- [#8525](https://github.com/dotansimha/graphql-code-generator/pull/8525) [`63dc8f205`](https://github.com/dotansimha/graphql-code-generator/commit/63dc8f2054e27b944f7d8dc59db8afa85760a127) Thanks [@charlypoly](https://github.com/charlypoly)! - remove `DetailledError`, not supported by Listr renderer
+
+- Updated dependencies [[`63dc8f205`](https://github.com/dotansimha/graphql-code-generator/commit/63dc8f2054e27b944f7d8dc59db8afa85760a127)]:
+  - @graphql-codegen/core@2.6.3
+  - @graphql-codegen/plugin-helpers@2.7.2
+
+## 2.13.8
+
+### Patch Changes
+
+- [#8535](https://github.com/dotansimha/graphql-code-generator/pull/8535) [`88aa38ff9`](https://github.com/dotansimha/graphql-code-generator/commit/88aa38ff9eb94b66d783a4af3116d9d3313fdbfd) Thanks [@charlypoly](https://github.com/charlypoly)! - dependencies updates:
+
+  - Updated dependency [`@graphql-tools/load@7.8.0` ↗︎](https://www.npmjs.com/package/@graphql-tools/load/v/7.8.0) (from `^7.7.1`, in `dependencies`)
+
+- [#8535](https://github.com/dotansimha/graphql-code-generator/pull/8535) [`88aa38ff9`](https://github.com/dotansimha/graphql-code-generator/commit/88aa38ff9eb94b66d783a4af3116d9d3313fdbfd) Thanks [@charlypoly](https://github.com/charlypoly)! - Upgrade `@graphql-tools/load` to get benefits of debug mode
+
 ## 2.13.7
 
 ### Patch Changes
