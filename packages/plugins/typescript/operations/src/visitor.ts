@@ -64,7 +64,7 @@ export class FragmentSpreadImportHandler extends SelectionSetToObject<TypeScript
         return original;
       } else {
         const fragmentSpreadTypes = fragmentSpreads.map(fragment => {
-          return fragment.name.value + this._getFragmentSuffix(fragment.name.value);
+          return this._convertName(fragment.name.value) + this._getFragmentSuffix(fragment.name.value);
         });
         if (fragmentSpreads.length === this._selectionSet.selections.length) {
           // If the fragment spread is the only selection

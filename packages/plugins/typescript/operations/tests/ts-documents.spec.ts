@@ -285,6 +285,53 @@ describe('TypeScript Operations Plugin', () => {
       );
     });
 
+    it('Can use imported fragments that are lowercase', async () => {
+      const testSchema = buildSchema(/* GraphQL */ `
+        interface Comment {
+          id: ID!
+          title: String!
+        }
+
+        type TextComment implements Comment {
+          id: ID!
+          title: String!
+          text: String!
+        }
+
+        type ImageComment implements Comment {
+          id: ID!
+          title: String!
+          image: String!
+        }
+
+        type post {
+          id: ID!
+          comments: [Comment!]!
+        }
+      `);
+
+      const ast = parse(/* GraphQL */ `
+        fragment PostPlus on post {
+          id
+          ...post
+        }
+      `);
+
+      const { content } = await plugin(
+        testSchema,
+        [{ location: 'test-file.ts', document: ast }],
+        {
+          referenceFragmentSpreads: true,
+        },
+        {
+          outputFile: '',
+        }
+      );
+      expect(content).toBeSimilarStringTo(
+        `export type PostPlusFragment = { __typename?: 'post', id: string } & PostFragment`
+      );
+    });
+
     it('Can use imported fragment spreads when the spread is the only item in selection set', async () => {
       const testSchema = buildSchema(/* GraphQL */ `
         interface Comment {
