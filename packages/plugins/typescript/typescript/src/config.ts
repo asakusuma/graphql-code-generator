@@ -81,7 +81,7 @@ export interface TypeScriptPluginConfig extends RawTypesConfig {
    */
   constEnums?: boolean;
   /**
-   * @description Generates enum as TypeScript `type` instead of `enum`. Useful if you wish to generate `.d.ts` declaration file instead of `.ts`
+   * @description Generates enum as TypeScript string union `type` instead of an `enum`. Useful if you wish to generate `.d.ts` declaration file instead of `.ts`, or if you want to avoid using TypeScript enums due to bundle size concerns
    * @default false
    *
    * @exampleMarkdown
@@ -366,7 +366,7 @@ export interface TypeScriptPluginConfig extends RawTypesConfig {
    * ## Disable all export from a file
    *
    * ```ts filename="codegen.ts"
-   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *  import type { CodegenConfig } from '@graphql-codegen/cli'
    *
    *  const config: CodegenConfig = {
    *    // ...
@@ -375,11 +375,11 @@ export interface TypeScriptPluginConfig extends RawTypesConfig {
    *        plugins: ['typescript'],
    *        config: {
    *          noExport: true
-   *        },
-   *      },
-   *    },
-   *  };
-   *  export default config;
+   *        }
+   *      }
+   *    }
+   *  }
+   *  export default config
    * ```
    */
   noExport?: boolean;

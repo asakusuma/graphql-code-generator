@@ -1,5 +1,32 @@
 # @graphql-codegen/visitor-plugin-common
 
+## 2.13.3
+
+### Patch Changes
+
+- [#8664](https://github.com/dotansimha/graphql-code-generator/pull/8664) [`62f655452`](https://github.com/dotansimha/graphql-code-generator/commit/62f6554520955dd675e11c920f35ef9bf0aaeffe) Thanks [@jdmoody](https://github.com/jdmoody)! - Fix issue where selection set flattening uses the wrong parent type
+
+## 2.13.2
+
+### Patch Changes
+
+- [#8586](https://github.com/dotansimha/graphql-code-generator/pull/8586) [`ef4c2c9c2`](https://github.com/dotansimha/graphql-code-generator/commit/ef4c2c9c233c68830f10eb4c167c7cceead27122) Thanks [@levrik](https://github.com/levrik)! - Fix incompatibility between `@oneOf` input types and declaration kind other than `type`
+
+## 2.13.1
+
+### Patch Changes
+
+- [#8525](https://github.com/dotansimha/graphql-code-generator/pull/8525) [`63dc8f205`](https://github.com/dotansimha/graphql-code-generator/commit/63dc8f2054e27b944f7d8dc59db8afa85760a127) Thanks [@charlypoly](https://github.com/charlypoly)! - remove `DetailledError`, not supported by Listr renderer
+
+- Updated dependencies [[`63dc8f205`](https://github.com/dotansimha/graphql-code-generator/commit/63dc8f2054e27b944f7d8dc59db8afa85760a127)]:
+  - @graphql-codegen/plugin-helpers@2.7.2
+
+## 2.13.0
+
+### Minor Changes
+
+- [#8498](https://github.com/dotansimha/graphql-code-generator/pull/8498) [`a46b8d99c`](https://github.com/dotansimha/graphql-code-generator/commit/a46b8d99c797283d773ec14163c62be9c84d4c2b) Thanks [@charlypoly](https://github.com/charlypoly)! - Fragment masking ` $fragmentName` and ` $fragmentRefs` are optionals
+
 ## 2.12.2
 
 ### Patch Changes

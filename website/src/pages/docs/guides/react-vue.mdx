@@ -43,7 +43,28 @@ All the below code examples are available in our [repository `examples/front-end
 
 For most GraphQL clients and frameworks (React, Vue), install the following packages:
 
-<PackageCmd packages={['graphql', '-D typescript', '-D @graphql-codegen/cli', '-D @graphql-codegen/client-preset']} />
+**For Yarn:**
+
+```bash
+yarn add graphql
+yarn add -D typescript @graphql-codegen/cli @graphql-codegen/client-preset
+```
+
+**For npm:**
+
+```bash
+npm i -S graphql
+npm i -D typescript @graphql-codegen/cli @graphql-codegen/client-preset
+```
+
+**For pnpm:**
+
+```bash
+pnpm i graphql @graphql-typed-document-node/core
+pnpm i -D typescript @graphql-codegen/cli @graphql-codegen/client-preset
+```
+
+<br />
 
 Then provide the corresponding framework-specific configuration:
 
@@ -125,7 +146,7 @@ _Using GraphQL Code Generator will type your GraphQL Query and Mutations as you 
 
 Now, we can start implementing our first query with the `graphql()` function, generated in `src/gql/`:
 
-<Tabs items={['React Apollo', 'React Query', 'React URQL', 'Vue Apollo', 'Vue URQL']}>
+<Tabs items={['React Apollo', 'React Query', 'React URQL', 'Vue URQL', 'Vue Apollo']}>
 
 <Tab>
 
@@ -335,7 +356,7 @@ const films = computed(() => result.value?.allFilms?.edges?.map(e => e?.node!))
 
 </Callout>
 
-Simply use the provided `graphql()` function (from `../src/gql/`) to define your GraphQL Query or Mutation, then, get instantly typed-variables and result just by passing your GraphQL documentto your favorite client ✨
+Simply use the provided `graphql()` function (from `../src/gql/`) to define your GraphQL Query or Mutation, then, get instantly typed-variables and result just by passing your GraphQL document to your favorite client ✨
 
 Let's now take a look at how to define our `<Film>` component using the `FilmItem` fragment and its corresponding TypeScript type.
 
@@ -484,7 +505,7 @@ The `client` preset allows the following `config` options:
 - [`namingConvention`](/plugins/typescript/typescript#config-api-reference): Available case functions in `change-case-all` are `camelCase`, `capitalCase`, `constantCase`, `dotCase`, `headerCase`, `noCase`, `paramCase`, `pascalCase`, `pathCase`, `sentenceCase`, `snakeCase`, `lowerCase`, `localeLowerCase`, `lowerCaseFirst`, `spongeCase`, `titleCase`, `upperCase`, `localeUpperCase` and `upperCaseFirst`
 - [`useTypeImports`](/plugins/typescript/typescript#config-api-reference): Will use `import type {}` rather than `import {}` when importing only types. This gives compatibility with TypeScript's `"importsNotUsedAsValues": "error"` option.
 - [`skipTypename`](/plugins/typescript/typescript#config-api-reference): Does not add `__typename` to the generated types, unless it was specified in the selection set.
-- [`enumsAsTypes`](/plugins/typescript/typescript#config-api-reference): Generates enum as TypeScript `type` instead of `enum`. Useful if you wish to generate `.d.ts` declaration file instead of `.ts`
+- [`enumsAsTypes`](/plugins/typescript/typescript#config-api-reference): Generates enum as TypeScript string union `type` instead of an `enum`. Useful if you wish to generate `.d.ts` declaration file instead of `.ts`, or if you want to avoid using TypeScript enums due to bundle size concerns
 - [`arrayInputCoercion`](/plugins/typescript/typescript-operations#config-api-reference): The [GraphQL spec](https://spec.graphql.org/draft/#sel-FAHjBJFCAACE_Gh7d) allows arrays and a single primitive value for list input. This allows to deactivate that behavior to only accept arrays instead of single values.
 
 <br />
@@ -560,8 +581,8 @@ GraphQL Code Generator `client` preset (`@graphql-codegen/client-preset`) is com
   - `@urql/preact` (since `1.4.0`)
   - `urql` (since `1.11.0`)
   - `graphql-request` (since `5.0.0`)
-  - `react-query` (with `graphql-request@5.0.0`)
-  - `swr` (with `graphql-request@5.0.0`)
+  - `react-query` (with `graphql-request@5.x`)
+  - `swr` (with `graphql-request@5.x`)
 
 - **Vue**
   - `@vue/apollo-composable` (since `4.0.0-alpha.13`)
