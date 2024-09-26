@@ -13,6 +13,7 @@ export default declare((api, opts): PluginObj => {
   const visitor = new ClientSideBaseVisitor(noopSchema, [], {}, {});
 
   const artifactDirectory = opts['artifactDirectory'] ?? '';
+  const gqlTagName = opts['gqlTagName'] || 'gql';
 
   let program: NodePath<Program>;
   return {
@@ -22,7 +23,7 @@ export default declare((api, opts): PluginObj => {
         program = path;
       },
       CallExpression(path, state) {
-        if (path.node.callee.type !== 'Identifier' || path.node.callee.name !== 'gql') {
+        if (path.node.callee.type !== 'Identifier' || path.node.callee.name !== gqlTagName) {
           return;
         }
         const [argument] = path.node.arguments;
@@ -53,7 +54,7 @@ export default declare((api, opts): PluginObj => {
 
         const importPath = getRelativeImportPath(state, artifactDirectory);
 
-        const importDeclaration = template(`
+        const importDeclaration = template.smart(`
           import { %%importName%% } from %%importPath%%
         `);
         program.unshiftContainer(
@@ -74,7 +75,7 @@ function getRelativeImportPath(state: PluginPass, artifactDirectory: string, fil
     throw new Error('Babel state is missing expected file name');
   }
 
-  const filename = state.file.opts.filename;
+  const { filename } = state.file.opts;
 
   const relative = path.relative(path.dirname(filename), path.resolve(artifactDirectory));
 

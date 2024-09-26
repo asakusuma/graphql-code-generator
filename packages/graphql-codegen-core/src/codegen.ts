@@ -1,5 +1,4 @@
 import {
-  DetailedError,
   Types,
   isComplexPluginOutput,
   federationSpec,
@@ -8,8 +7,8 @@ import {
   createNoopProfiler,
 } from '@graphql-codegen/plugin-helpers';
 import { visit, DefinitionNode, Kind, print, NameNode, specifiedRules, DocumentNode } from 'graphql';
-import { executePlugin } from './execute-plugin';
-import { checkValidationErrors, validateGraphQlDocuments, Source, asArray } from '@graphql-tools/utils';
+import { executePlugin } from './execute-plugin.js';
+import { validateGraphQlDocuments, Source, asArray } from '@graphql-tools/utils';
 
 import { mergeSchemas } from '@graphql-tools/schema';
 import {
@@ -20,7 +19,7 @@ import {
   prioritize,
   shouldValidateDocumentsAgainstSchema,
   shouldValidateDuplicateDocuments,
-} from './utils';
+} from './utils.js';
 
 export async function codegen(options: Types.GenerateOptions): Promise<string> {
   const documents = options.documents || [];
@@ -90,7 +89,13 @@ export async function codegen(options: Types.GenerateOptions): Promise<string> {
       const schemaHash = extractHashFromSchema(schemaInstance);
 
       if (!schemaHash || !options.cache || documents.some(d => typeof d.hash !== 'string')) {
-        return validateGraphQlDocuments(schemaInstance, [...documents, ...fragments], rules);
+        return Promise.resolve(
+          validateGraphQlDocuments(
+            schemaInstance,
+            [...documents.flatMap(d => d.document), ...fragments.flatMap(f => f.document)],
+            rules
+          )
+        );
       }
 
       const cacheKey = [schemaHash]
@@ -99,10 +104,22 @@ export async function codegen(options: Types.GenerateOptions): Promise<string> {
         .join(',');
 
       return options.cache('documents-validation', cacheKey, () =>
-        validateGraphQlDocuments(schemaInstance, [...documents, ...fragments], rules)
+        Promise.resolve(
+          validateGraphQlDocuments(
+            schemaInstance,
+            [...documents.flatMap(d => d.document), ...fragments.flatMap(f => f.document)],
+            rules
+          )
+        )
       );
     }, 'Validate documents against schema');
-    checkValidationErrors(errors);
+
+    if (errors.length > 0) {
+      throw new Error(
+        `GraphQL Document Validation failed with ${errors.length} errors;
+  ${errors.map((error, index) => `Error ${index}: ${error.stack}`).join('\n\n')}`
+      );
+    }
   }
 
   const prepend: Set<string> = new Set<string>();
@@ -145,7 +162,8 @@ export async function codegen(options: Types.GenerateOptions): Promise<string> {
 
       if (typeof result === 'string') {
         return result || '';
-      } else if (isComplexPluginOutput(result)) {
+      }
+      if (isComplexPluginOutput(result)) {
         if (result.append && result.append.length > 0) {
           for (const item of result.append) {
             if (item) {
@@ -176,13 +194,14 @@ export async function codegen(options: Types.GenerateOptions): Promise<string> {
 function resolveCompareValue(a: string) {
   if (a.startsWith('/*') || a.startsWith('//') || a.startsWith(' *') || a.startsWith(' */') || a.startsWith('*/')) {
     return 0;
-  } else if (a.startsWith('package')) {
-    return 1;
-  } else if (a.startsWith('import')) {
-    return 2;
-  } else {
-    return 3;
   }
+  if (a.startsWith('package')) {
+    return 1;
+  }
+  if (a.startsWith('import')) {
+    return 2;
+  }
+  return 3;
 }
 
 export function sortPrependValues(values: string[]): string[] {
@@ -281,10 +300,8 @@ function validateDuplicateDocuments(files: Types.DocumentFile[]) {
         .join('');
 
       const definitionKindName = kind.replace('Definition', '').toLowerCase();
-      throw new DetailedError(
-        `Not all ${definitionKindName}s have an unique name: ${duplicated.join(', ')}`,
-        `
-          Not all ${definitionKindName}s have an unique name
+      throw new Error(
+        `Not all ${definitionKindName}s have an unique name: ${duplicated.join(', ')}: \n
           ${list}
         `
       );

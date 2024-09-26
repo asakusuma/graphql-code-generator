@@ -12,15 +12,15 @@ import {
   printIntrospectionSchema,
   isObjectType,
 } from 'graphql';
-import { TsVisitor } from './visitor';
-import { TsIntrospectionVisitor } from './introspection-visitor';
-import { TypeScriptPluginConfig } from './config';
+import { TsVisitor } from './visitor.js';
+import { TsIntrospectionVisitor } from './introspection-visitor.js';
+import { TypeScriptPluginConfig } from './config.js';
 import { transformSchemaAST } from '@graphql-codegen/schema-ast';
 
-export * from './typescript-variables-to-object';
-export * from './visitor';
-export * from './config';
-export * from './introspection-visitor';
+export * from './typescript-variables-to-object.js';
+export * from './visitor.js';
+export * from './config.js';
+export * from './introspection-visitor.js';
 
 export const plugin: PluginFunction<TypeScriptPluginConfig, Types.ComplexPluginOutput> = (
   schema: GraphQLSchema,
@@ -65,7 +65,7 @@ export function includeIntrospectionTypesDefinitions(
     Field() {
       const type = getNamedType(typeInfo.getType());
 
-      if (isIntrospectionType(type) && !usedTypes.includes(type)) {
+      if (type && isIntrospectionType(type) && !usedTypes.includes(type)) {
         usedTypes.push(type);
       }
     },

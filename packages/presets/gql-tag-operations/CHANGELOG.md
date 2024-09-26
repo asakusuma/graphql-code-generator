@@ -1,5 +1,137 @@
 # @graphql-codegen/gql-tag-operations-preset
 
+## 1.7.0
+
+### Minor Changes
+
+- [#8498](https://github.com/dotansimha/graphql-code-generator/pull/8498) [`a46b8d99c`](https://github.com/dotansimha/graphql-code-generator/commit/a46b8d99c797283d773ec14163c62be9c84d4c2b) Thanks [@charlypoly](https://github.com/charlypoly)! - Fragment masking ` $fragmentName` and ` $fragmentRefs` are optionals
+
+### Patch Changes
+
+- Updated dependencies [[`a46b8d99c`](https://github.com/dotansimha/graphql-code-generator/commit/a46b8d99c797283d773ec14163c62be9c84d4c2b)]:
+  - @graphql-codegen/visitor-plugin-common@2.13.0
+  - @graphql-codegen/gql-tag-operations@1.5.5
+  - @graphql-codegen/typescript-operations@2.5.5
+  - @graphql-codegen/typed-document-node@2.3.5
+  - @graphql-codegen/typescript@2.7.5
+
+## 1.6.0
+
+### Minor Changes
+
+- [#8302](https://github.com/dotansimha/graphql-code-generator/pull/8302) [`876844e76`](https://github.com/dotansimha/graphql-code-generator/commit/876844e7644a917172f09b3c4eb54a2f4c90e4c6) Thanks [@charlypoly](https://github.com/charlypoly)! - **`@graphql-codegen/gql-tag-operations` and `@graphql-codegen/gql-tag-operations-preset`**
+
+  Introduce a `gqlTagName` configuration option
+
+  ***
+
+  **`@graphql-codegen/client-preset`**
+
+  New preset for GraphQL Code Generator v3, more information on the RFC: https://github.com/dotansimha/graphql-code-generator/issues/8296
+
+  ***
+
+  **`@graphql-codegen/cli`**
+
+  Update init wizard with 3.0 recommendations (`codegen.ts`, `client` preset)
+
+### Patch Changes
+
+- Updated dependencies [[`876844e76`](https://github.com/dotansimha/graphql-code-generator/commit/876844e7644a917172f09b3c4eb54a2f4c90e4c6)]:
+  - @graphql-codegen/gql-tag-operations@1.5.0
+
+## 1.5.5
+
+### Patch Changes
+
+- [#8260](https://github.com/dotansimha/graphql-code-generator/pull/8260) [`576d3ad01`](https://github.com/dotansimha/graphql-code-generator/commit/576d3ad01349c564355d6fffb55487decfa81c4e) Thanks [@saihaj](https://github.com/saihaj)! - use [`template.smart`](https://babeljs.io/docs/en/babel-template#templatesmart) instead of default import which should fix bable plugin loading issues in `vite`
+
+## 1.5.4
+
+### Patch Changes
+
+- [#8189](https://github.com/dotansimha/graphql-code-generator/pull/8189) [`b408f8238`](https://github.com/dotansimha/graphql-code-generator/commit/b408f8238c00bbb4cd448501093856c06cfde50f) Thanks [@n1ru4l](https://github.com/n1ru4l)! - Fix CommonJS TypeScript resolution with `moduleResolution` `node16` or `nodenext`
+
+- Updated dependencies [[`b408f8238`](https://github.com/dotansimha/graphql-code-generator/commit/b408f8238c00bbb4cd448501093856c06cfde50f), [`47d0a57e2`](https://github.com/dotansimha/graphql-code-generator/commit/47d0a57e27dd0d2334670bfc6c81c45e00ff4e74)]:
+  - @graphql-codegen/add@3.2.1
+  - @graphql-codegen/visitor-plugin-common@2.12.1
+  - @graphql-codegen/gql-tag-operations@1.4.1
+  - @graphql-codegen/typescript-operations@2.5.3
+  - @graphql-codegen/typed-document-node@2.3.3
+  - @graphql-codegen/typescript@2.7.3
+  - @graphql-codegen/plugin-helpers@2.6.2
+
+## 1.5.3
+
+### Patch Changes
+
+- 95db434b0: Add missing file extension for re-exports in ESM mode
+
+## 1.5.2
+
+### Patch Changes
+
+- bc4b7eb24: Bumping to release for https://github.com/dotansimha/graphql-code-generator/issues/8067
+
+## 1.5.1
+
+### Patch Changes
+
+- 525ad580b: Revert breaking change for Next.js applications that are incapable of resolving an import with a `.js` extension.
+- Updated dependencies [525ad580b]
+  - @graphql-codegen/visitor-plugin-common@2.11.1
+  - @graphql-codegen/gql-tag-operations@1.3.1
+  - @graphql-codegen/typescript-operations@2.5.1
+  - @graphql-codegen/typed-document-node@2.3.1
+  - @graphql-codegen/typescript@2.7.1
+
+## 1.5.0
+
+### Minor Changes
+
+- 68bb30e19: Attach `.js` extension to relative file imports for compliance with ESM module resolution. Since in CommonJS the `.js` extension is optional, this is not a breaking change.
+
+  If you have path configuration within your configuration, consider attaching `.js` if you are migrating to ESM.
+
+  ```yml
+  mappers:
+    MyOtherType: './my-file.js#MyCustomOtherType',
+  ```
+
+- d84afec09: Support TypeScript ESM modules (`"module": "node16"` and `"moduleResolution": "node16"`).
+
+  [More information on the TypeScript Release Notes.](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#ecmascript-module-support-in-node-js)
+
+### Patch Changes
+
+- Updated dependencies [68bb30e19]
+- Updated dependencies [d84afec09]
+- Updated dependencies [a4fe5006b]
+- Updated dependencies [8e44df58b]
+  - @graphql-codegen/visitor-plugin-common@2.11.0
+  - @graphql-codegen/add@3.2.0
+  - @graphql-codegen/gql-tag-operations@1.3.0
+  - @graphql-codegen/typescript-operations@2.5.0
+  - @graphql-codegen/typed-document-node@2.3.0
+  - @graphql-codegen/typescript@2.7.0
+  - @graphql-codegen/plugin-helpers@2.5.0
+
+## 1.4.0
+
+### Minor Changes
+
+- 9d0840951: Allow `useFragment` to take arrays and nullable values as arguments
+
+### Patch Changes
+
+- Updated dependencies [9312920a4]
+- Updated dependencies [2966686e9]
+  - @graphql-codegen/typescript-operations@2.3.6
+  - @graphql-codegen/visitor-plugin-common@2.7.5
+  - @graphql-codegen/gql-tag-operations@1.2.12
+  - @graphql-codegen/typed-document-node@2.2.9
+  - @graphql-codegen/typescript@2.4.9
+
 ## 1.3.0
 
 ### Minor Changes

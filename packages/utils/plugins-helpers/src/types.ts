@@ -1,6 +1,7 @@
 import { GraphQLSchema, DocumentNode } from 'graphql';
 import { Source } from '@graphql-tools/utils';
-import type { Profiler } from './profiler';
+import type { Profiler } from './profiler.js';
+import type { ApolloEngineOptions } from '@graphql-tools/apollo-engine-loader';
 
 export namespace Types {
   export interface GenerateOptions {
@@ -177,6 +178,10 @@ export namespace Types {
     [globPath: string]: LocalSchemaPathOptions;
   }
 
+  export interface ApolloEngineSchemaOptions {
+    'apollo-engine': ApolloEngineOptions;
+  }
+
   export type SchemaGlobPath = string;
   /**
    * @description A URL to your GraphQL endpoint, a local path to `.graphql` file, a glob pattern to your GraphQL schema files, or a JavaScript file that exports the schema to generate code from. This can also be an array which specifies multiple schemas to generate code from. You can read more about the supported formats [here](schema-field#available-formats).
@@ -184,6 +189,7 @@ export namespace Types {
   export type Schema =
     | string
     | UrlSchemaWithOptions
+    | ApolloEngineSchemaOptions
     | LocalSchemaPathWithOptions
     | SchemaGlobPath
     | SchemaWithLoader
@@ -218,6 +224,14 @@ export namespace Types {
   export type NamedPreset = string;
   export type OutputConfig = NamedPlugin | ConfiguredPlugin;
 
+  export type PresetNamesBase =
+    | 'client'
+    | 'near-operation-file'
+    | 'gql-tag-operations'
+    | 'graphql-modules'
+    | 'import-types';
+  export type PresetNames = `${PresetNamesBase}-preset` | PresetNamesBase;
+
   /**
    * @additionalProperties false
    */
@@ -242,7 +256,7 @@ export namespace Types {
      *
      * List of available presets: https://graphql-code-generator.com/docs/presets/presets-index
      */
-    preset?: string | OutputPreset;
+    preset?: PresetNames | OutputPreset;
     /**
      * @description If your setup uses Preset to have a more dynamic setup and output, set the configuration object of your preset here.
      *
@@ -330,6 +344,10 @@ export namespace Types {
 
   export type OutputPreset<TPresetConfig = any> = {
     buildGeneratesSection: (options: PresetFnArgs<TPresetConfig>) => Promisable<GenerateOptions[]>;
+    prepareDocuments?: (
+      outputFilePath: string,
+      outputSpecificDocuments: Types.OperationDocument[]
+    ) => Promisable<Types.OperationDocument[]>;
   };
 
   /* Require Extensions */
@@ -434,9 +452,25 @@ export namespace Types {
       interval?: number;
     };
     /**
+     * @description A flag to suppress non-zero exit code when there are no documents to generate.
+     */
+    ignoreNoDocuments?: boolean;
+    /**
+     * @description A flag to disable adding `.js` extension to the output file. Default: `true`.
+     */
+    emitLegacyCommonJSImports?: boolean;
+    /**
      * @description A flag to suppress printing errors when they occur.
      */
     silent?: boolean;
+    /**
+     * @description A flag to output more detailed information about tasks
+     */
+    verbose?: boolean;
+    /**
+     * @description A flag to output debug logs
+     */
+    debug?: boolean;
     /**
      * @description A flag to print only errors.
      */
@@ -490,50 +524,52 @@ export namespace Types {
   export type PluginOutput = string | ComplexPluginOutput;
   export type HookFunction = (...args: any[]) => void | Promise<void>;
 
+  export type LifeCycleHookValue = string | HookFunction | (string | HookFunction)[];
+
   /**
    * @description All available lifecycle hooks
    * @additionalProperties false
    */
-  export type LifecycleHooksDefinition<T = string | HookFunction | (string | HookFunction)[]> = {
+  export type LifecycleHooksDefinition = {
     /**
      * @description Triggered with no arguments when the codegen starts (after the `codegen.yml` has beed parsed).
      *
      * Specify a shell command to run.
      */
-    afterStart: T;
+    afterStart: LifeCycleHookValue;
     /**
      * @description Triggered with no arguments, right before the codegen closes, or when watch mode is stopped.
      *
      * Specify a shell command to run.
      */
-    beforeDone: T;
+    beforeDone: LifeCycleHookValue;
     /**
      * @description Triggered every time a file changes when using watch mode.
      * Triggered with two arguments: the type of the event (for example, `changed`) and the path of the file.
      */
-    onWatchTriggered: T;
+    onWatchTriggered: LifeCycleHookValue;
     /**
      * @description Triggered in case of a general error in the codegen. The argument is a string containing the error.
      */
-    onError: T;
+    onError: LifeCycleHookValue;
     /**
      * @description Triggered after a file is written to the file-system. Executed with the path for the file.
      * If the content of the file hasn't changed since last execution - this hooks won't be triggered.
      *
      * > This is a very useful hook, you can use it for integration with Prettier or other linters.
      */
-    afterOneFileWrite: T;
+    afterOneFileWrite: LifeCycleHookValue;
     /**
      * @description Executed after writing all the files to the file-system.
      * Triggered with multiple arguments - paths for all files.
      */
-    afterAllFileWrite: T;
+    afterAllFileWrite: LifeCycleHookValue;
     /**
      * @description Triggered before a file is written to the file-system. Executed with the path for the file.
      *
      * If the content of the file hasn't changed since last execution - this hooks won't be triggered.
      */
-    beforeOneFileWrite: T;
+    beforeOneFileWrite: LifeCycleHookValue;
     /**
      * @description Executed after the codegen has done creating the output and before writing the files to the file-system.
      *
@@ -541,7 +577,7 @@ export namespace Types {
      *
      * > Not all the files will be actually written to the file-system, because this is triggered before checking if the file has changed since last execution.
      */
-    beforeAllFileWrite: T;
+    beforeAllFileWrite: LifeCycleHookValue;
   };
 
   export type SkipDocumentsValidationOptions =

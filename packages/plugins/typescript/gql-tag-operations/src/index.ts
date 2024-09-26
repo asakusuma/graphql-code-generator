@@ -25,29 +25,56 @@ export const plugin: PluginFunction<{
   sourcesWithOperations: Array<SourceWithOperations>;
   useTypeImports?: boolean;
   augmentedModuleName?: string;
-}> = (_, __, { sourcesWithOperations, useTypeImports, augmentedModuleName }, _info) => {
-  if (!sourcesWithOperations) {
-    return '';
-  }
-
+  gqlTagName?: string;
+  emitLegacyCommonJSImports?: boolean;
+}> = (
+  _,
+  __,
+  { sourcesWithOperations, useTypeImports, augmentedModuleName, gqlTagName = 'gql', emitLegacyCommonJSImports },
+  _info
+) => {
   if (augmentedModuleName == null) {
-    return [
-      `import * as graphql from './graphql';\n`,
+    const code = [
+      `import * as types from './graphql${emitLegacyCommonJSImports ? '' : '.js'}';\n`,
       `${
         useTypeImports ? 'import type' : 'import'
       } { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';\n`,
       `\n`,
-      ...getDocumentRegistryChunk(sourcesWithOperations),
-      `\n`,
-      ...getGqlOverloadChunk(sourcesWithOperations, 'lookup'),
-      `\n`,
-      `export function gql(source: string): unknown;\n`,
-      `export function gql(source: string) {\n`,
-      `  return (documents as any)[source] ?? {};\n`,
-      `}\n`,
-      `\n`,
-      ...documentTypePartial,
-    ].join(``);
+    ];
+
+    if (sourcesWithOperations.length > 0) {
+      code.push(
+        [
+          ...getDocumentRegistryChunk(sourcesWithOperations),
+          `\n`,
+          ...getGqlOverloadChunk(sourcesWithOperations, gqlTagName, 'lookup', emitLegacyCommonJSImports),
+        ].join('')
+      );
+    } else {
+      code.push('const documents = [];');
+    }
+
+    code.push(
+      [
+        `\n`,
+        `/**\n * The ${gqlTagName} function is used to parse GraphQL queries into a document that can be used by GraphQL clients.\n *\n`,
+        ` *\n * @example\n`,
+        ' * ```ts\n',
+        ' * const query = gql(`query GetUser($id: ID!) { user(id: $id) { name } }`);\n',
+        ' * ```\n *\n',
+        ` * The query argument is unknown!\n`,
+        ` * Please regenerate the types.\n`,
+        `**/\n`,
+        `export function ${gqlTagName}(source: string): unknown;\n`,
+        `\n`,
+        `export function ${gqlTagName}(source: string) {\n`,
+        `  return (documents as any)[source] ?? {};\n`,
+        `}\n`,
+        `\n`,
+        ...documentTypePartial,
+      ].join('')
+    );
+    return code.join('');
   }
 
   return [
@@ -55,8 +82,10 @@ export const plugin: PluginFunction<{
     `declare module "${augmentedModuleName}" {`,
     [
       `\n`,
-      ...getGqlOverloadChunk(sourcesWithOperations, 'augmented'),
-      `export function gql(source: string): unknown;\n`,
+      ...(sourcesWithOperations.length > 0
+        ? getGqlOverloadChunk(sourcesWithOperations, gqlTagName, 'augmented', emitLegacyCommonJSImports)
+        : []),
+      `export function ${gqlTagName}(source: string): unknown;\n`,
       `\n`,
       ...documentTypePartial,
     ]
@@ -68,13 +97,20 @@ export const plugin: PluginFunction<{
 
 function getDocumentRegistryChunk(sourcesWithOperations: Array<SourceWithOperations> = []) {
   const lines = new Set<string>();
+  lines.add(
+    `/**\n * Map of all GraphQL operations in the project.\n *\n * This map has several performance disadvantages:\n`
+  );
+  lines.add(` * 1. It is not tree-shakeable, so it will include all operations in the project.\n`);
+  lines.add(` * 2. It is not minifiable, so the string of a GraphQL query will be multiple times inside the bundle.\n`);
+  lines.add(` * 3. It does not support dead code elimination, so it will add unused operations.\n *\n`);
+  lines.add(` * Therefore it is highly recommended to use the babel-plugin for production.\n */\n`);
   lines.add(`const documents = {\n`);
 
   for (const { operations, ...rest } of sourcesWithOperations) {
     const originalString = rest.source.rawSDL!;
     const operation = operations[0];
 
-    lines.add(`    ${JSON.stringify(originalString)}: graphql.${operation.initialName},\n`);
+    lines.add(`    ${JSON.stringify(originalString)}: types.${operation.initialName},\n`);
   }
 
   lines.add(`};\n`);
@@ -84,7 +120,12 @@ function getDocumentRegistryChunk(sourcesWithOperations: Array<SourceWithOperati
 
 type Mode = 'lookup' | 'augmented';
 
-function getGqlOverloadChunk(sourcesWithOperations: Array<SourceWithOperations>, mode: Mode) {
+function getGqlOverloadChunk(
+  sourcesWithOperations: Array<SourceWithOperations>,
+  gqlTagName: string,
+  mode: Mode,
+  emitLegacyCommonJSImports?: boolean
+) {
   const lines = new Set<string>();
 
   // We intentionally don't use a <T extends keyof typeof documents> generic, because TS
@@ -94,8 +135,13 @@ function getGqlOverloadChunk(sourcesWithOperations: Array<SourceWithOperations>,
     const returnType =
       mode === 'lookup'
         ? `(typeof documents)[${JSON.stringify(originalString)}]`
-        : `typeof import('./graphql').${operations[0].initialName}`;
-    lines.add(`export function gql(source: ${JSON.stringify(originalString)}): ${returnType};\n`);
+        : emitLegacyCommonJSImports
+        ? `typeof import('./graphql').${operations[0].initialName}`
+        : `typeof import('./graphql.js').${operations[0].initialName}`;
+    lines.add(
+      `/**\n * The ${gqlTagName} function is used to parse GraphQL queries into a document that can be used by GraphQL clients.\n */\n` +
+        `export function ${gqlTagName}(source: ${JSON.stringify(originalString)}): ${returnType};\n`
+    );
   }
 
   return lines;

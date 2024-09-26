@@ -1,7 +1,6 @@
-import { EnumValuesMap, ParsedEnumValuesMap } from './types';
+import { EnumValuesMap, ParsedEnumValuesMap } from './types.js';
 import { GraphQLSchema, isEnumType, GraphQLEnumType } from 'graphql';
-import { DetailedError } from '@graphql-codegen/plugin-helpers';
-import { parseMapper } from './mappers';
+import { parseMapper } from './mappers.js';
 
 function escapeString(str: string) {
   return str.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/'/g, "\\'");
@@ -24,7 +23,7 @@ export function parseEnumValues({
       for (const enumTypeName of allEnums) {
         const enumType = schema.getType(enumTypeName) as GraphQLEnumType;
         for (const { name, value } of enumType.getValues()) {
-          if (value && value !== name) {
+          if (value !== name) {
             mapOrStr[enumTypeName] = mapOrStr[enumTypeName] || {};
             if (typeof mapOrStr[enumTypeName] !== 'string' && !mapOrStr[enumTypeName][name]) {
               mapOrStr[enumTypeName][name] = typeof value === 'string' ? escapeString(value) : value;
@@ -37,9 +36,9 @@ export function parseEnumValues({
     const invalidMappings = Object.keys(mapOrStr).filter(gqlName => !allEnums.includes(gqlName));
 
     if (invalidMappings.length > 0) {
-      throw new DetailedError(
-        `Invalid 'enumValues' mapping!`,
-        `The following types does not exist in your GraphQL schema: ${invalidMappings.join(', ')}`
+      throw new Error(
+        `Invalid 'enumValues' mapping! \n
+        The following types does not exist in your GraphQL schema: ${invalidMappings.join(', ')}`
       );
     }
 
@@ -60,7 +59,8 @@ export function parseEnumValues({
             mappedValues: null,
           },
         };
-      } else if (typeof pointer === 'object') {
+      }
+      if (typeof pointer === 'object') {
         return {
           ...prev,
           [gqlIdentifier]: {
@@ -72,14 +72,14 @@ export function parseEnumValues({
             mappedValues: pointer,
           },
         };
-      } else {
-        throw new DetailedError(
-          `Invalid "enumValues" configuration`,
-          `Enum "${gqlIdentifier}": expected string or object (with enum values mapping)`
-        );
       }
+      throw new Error(
+        `Invalid "enumValues" configuration \n
+        Enum "${gqlIdentifier}": expected string or object (with enum values mapping)`
+      );
     }, {} as ParsedEnumValuesMap);
-  } else if (typeof mapOrStr === 'string') {
+  }
+  if (typeof mapOrStr === 'string') {
     return allEnums
       .filter(enumName => !enumName.startsWith('__'))
       .reduce((prev, enumName) => {

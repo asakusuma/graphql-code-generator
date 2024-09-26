@@ -11,7 +11,7 @@ const options = {
     './tests/test-files/modules': {
       schema: './tests/test-files/modules/*/types/*.graphql',
       plugins: ['typescript', 'typescript-resolvers'],
-      preset: 'graphql-modules',
+      preset: 'graphql-modules' as const,
       presetConfig: {
         baseTypesPath: 'global-types.ts',
         filename: 'module-types.ts',
@@ -25,7 +25,9 @@ describe('Integration', () => {
   monorepo.correctCWD();
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({
+      legacyFakeTimers: true,
+    });
   });
 
   // In this test, we make sure executeCodegen passes on a list of Sources as an extension
@@ -87,6 +89,35 @@ describe('Integration', () => {
     expect(output[4].content).toMatch(importStatement);
   });
 
+  test('should import with respect of useTypeImports config correctly', async () => {
+    const output = await executeCodegen({
+      generates: {
+        './tests/test-files/modules': {
+          schema: './tests/test-files/modules/*/types/*.graphql',
+          plugins: ['typescript', 'typescript-resolvers'],
+          preset: 'graphql-modules',
+          presetConfig: {
+            importBaseTypesFrom: '@types',
+            baseTypesPath: 'global-types.ts',
+            filename: 'module-types.ts',
+            encapsulateModuleTypes: 'none',
+          },
+        },
+      },
+      config: {
+        useTypeImports: true,
+      },
+    });
+
+    const importStatement = `import type * as Types from "@types";`;
+
+    expect(output.length).toBe(5);
+    expect(output[1].content).toMatch(importStatement);
+    expect(output[2].content).toMatch(importStatement);
+    expect(output[3].content).toMatch(importStatement);
+    expect(output[4].content).toMatch(importStatement);
+  });
+
   test('should allow to disable graphql-modules', async () => {
     const output = await executeCodegen({
       generates: {
@@ -138,5 +169,45 @@ describe('Integration', () => {
 
     expect(output.length).toBe(5);
     expect(output[3].content).toMatchSnapshot();
+  });
+
+  test('should NOT produce required root-level resolvers in Resolvers interface by default', async () => {
+    const output = await executeCodegen(options);
+
+    const usersModuleOutput = output.find(o => o.filename.includes('users'))!;
+
+    expect(usersModuleOutput).toBeDefined();
+    expect(usersModuleOutput.content).toContain(
+      `export type QueryResolvers = Pick<Types.QueryResolvers, DefinedFields['Query']>;`
+    );
+    expect(usersModuleOutput.content).toContain('Query?: QueryResolvers;');
+  });
+
+  test('should produce required root-level resolvers in Resolvers interface when requireRootResolvers flag is enabled', async () => {
+    const optionsCopy = Object.assign({} as any, options);
+
+    optionsCopy.generates['./tests/test-files/modules'].presetConfig = {
+      ...optionsCopy.generates['./tests/test-files/modules'].presetConfig,
+      requireRootResolvers: true,
+      useGraphQLModules: false,
+    };
+
+    const output = await executeCodegen(optionsCopy);
+
+    const usersModuleOutput = output.find(o => o.filename.includes('users'))!;
+
+    expect(usersModuleOutput).toBeDefined();
+
+    // Only Query related properties should be required
+    expect(usersModuleOutput.content).toBeSimilarStringTo(`
+      export type UserResolvers = Pick<Types.UserResolvers, DefinedFields['User'] | '__isTypeOf'>;
+      export type QueryResolvers = Required<Pick<Types.QueryResolvers, DefinedFields['Query']>>;
+    `);
+    expect(usersModuleOutput.content).toBeSimilarStringTo(`
+      export interface Resolvers {
+        User?: UserResolvers;
+        Query: QueryResolvers;
+      };
+    `);
   });
 });

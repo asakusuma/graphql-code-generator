@@ -1,11 +1,80 @@
-import type { Package } from '@guild-docs/server/npm';
-import { existsSync, readFileSync } from 'fs';
-import { transformDocs } from './transform';
-import { canUseDOM } from '../utils';
+import { StaticImageData } from 'next/image';
+import angularIcon from '../../public/assets/img/icons/angular.svg';
+import apolloIcon from '../../public/assets/img/icons/apollo.svg';
+import csharpIcon from '../../public/assets/img/icons/csharp.svg';
+import flowIcon from '../../public/assets/img/icons/flow.svg';
+import graphqlIcon from '../../public/assets/img/icons/graphql.svg';
+import javaIcon from '../../public/assets/img/icons/java.svg';
+import mongodbIcon from '../../public/assets/img/icons/mongodb.png';
+import nodeJsIcon from '../../public/assets/img/icons/nodejs.svg';
+import reactIcon from '../../public/assets/img/icons/react.svg';
+import reactQueryIcon from '../../public/assets/img/icons/react-query.svg';
+import typeGraphqlIcon from '../../public/assets/img/icons/type-graphql.png';
+import typescriptIcon from '../../public/assets/img/icons/typescript.svg';
+import urqlIcon from '../../public/assets/img/icons/urql.svg';
+import codegenIcon from '../../public/assets/img/icons/codegen.svg';
+import hasuraIcon from '../../public/assets/img/icons/hasura.svg';
+import vueIcon from '../../public/assets/img/icons/vue.svg';
+import dartIcon from '../../public/assets/img/icons/dart.svg';
+import graphqlModulesIcon from 'https://graphql-modules.com/assets/subheader-logo.svg';
+import reasonClientIcon from 'https://pbs.twimg.com/profile_images/1004185780313395200/ImZxrDWf_400x400.jpg';
+import mswIcon from 'https://raw.githubusercontent.com/mswjs/msw/HEAD/media/msw-logo.svg';
+
+const ALL_ICONS = [
+  'graphql',
+  'csharp',
+  'flow',
+  'codegen',
+  'hasura',
+  'java',
+  'typescript',
+  'angular',
+  'apollo',
+  'react_query',
+  'type_graphql',
+  'vue',
+  'dart',
+  'mongodb',
+  'graphql_modules',
+  'reason_client',
+  'msw',
+  'nodejs',
+  'react',
+  'urql',
+] as const;
+
+export type Icon = typeof ALL_ICONS[number];
+
+/* eslint sort-keys: error */
+export const icons: Record<Icon, StaticImageData> = {
+  angular: angularIcon,
+  apollo: apolloIcon,
+  codegen: codegenIcon,
+  csharp: csharpIcon,
+  dart: dartIcon,
+  flow: flowIcon,
+  graphql: graphqlIcon,
+  graphql_modules: graphqlModulesIcon,
+  hasura: hasuraIcon,
+  java: javaIcon,
+  mongodb: mongodbIcon,
+  msw: mswIcon,
+  nodejs: nodeJsIcon,
+  react: reactIcon,
+  react_query: reactQueryIcon,
+  reason_client: reasonClientIcon,
+  type_graphql: typeGraphqlIcon,
+  typescript: typescriptIcon,
+  urql: urqlIcon,
+  vue: vueIcon,
+};
+/* eslint-disable */
 
 export const ALL_TAGS = [
   'typescript',
   'csharp',
+  'dart',
+  'flutter',
   'flow',
   'java',
   'utilities',
@@ -31,376 +100,315 @@ export const ALL_TAGS = [
   'zod',
 ] as const;
 
-export type Tags = typeof ALL_TAGS[number];
+export type Tag = typeof ALL_TAGS[number];
 
-let generatedDocs: ReturnType<typeof transformDocs> | null = null;
-let staticMapping: Record<string, string> | null = null;
-
-function loadGeneratedReadme(options: { templateFile: string; pluginIdentifier: string }): string {
-  if (!generatedDocs) {
-    generatedDocs = transformDocs();
+export const PACKAGES: Record<
+  string,
+  {
+    title: string;
+    npmPackage: string;
+    icon: Icon | `https://${string}`;
+    tags: Tag[];
   }
-
-  if (!staticMapping) {
-    staticMapping = {
-      '{@operationsNote}': readFileSync(`docs-templates/client-note.md`, 'utf-8'),
-      '{@javaInstallation}': readFileSync(`docs-templates/java-installation.md`, 'utf-8'),
-    };
-  }
-
-  let templateBase = '{@apiDocs}';
-
-  if (existsSync(options.templateFile)) {
-    templateBase = readFileSync(options.templateFile, 'utf-8');
-  }
-
-  let out = templateBase.replace('{@apiDocs}', generatedDocs.docs[options.pluginIdentifier] || '');
-
-  Object.keys(staticMapping).forEach(key => {
-    out = out.replace(key, staticMapping![key]);
-  });
-
-  return out;
-}
-
-const PACKAGES: Package<Tags>[] = [
-  {
-    identifier: 'near-operation-file-preset',
-    title: 'near-operation-file-preset',
-    npmPackage: '@graphql-codegen/near-operation-file-preset',
-    iconUrl: '/assets/img/icons/codegen.svg',
-    tags: ['preset', 'utilities'],
-  },
-  {
-    identifier: 'graphql-modules-preset',
-    title: 'graphql-modules-preset',
-    npmPackage: '@graphql-codegen/graphql-modules-preset',
-    iconUrl: 'https://www.graphql-modules.com/img/just-logo.svg',
-    tags: ['preset', 'utilities', 'resolvers'],
-  },
-  {
-    identifier: 'import-types-preset',
-    title: 'import-types-preset',
-    npmPackage: '@graphql-codegen/import-types-preset',
-    iconUrl: '/assets/img/icons/codegen.svg',
-    tags: ['preset', 'utilities'],
-  },
-  {
-    identifier: 'gql-tag-operations-preset',
-    title: 'gql-tag-operations-preset',
-    npmPackage: '@graphql-codegen/gql-tag-operations-preset',
-    iconUrl: '/assets/img/icons/codegen.svg',
-    tags: ['preset', 'utilities', 'typescript'],
-  },
-  {
-    identifier: 'named-operations-object',
-    title: 'Named Operations Object',
-    npmPackage: '@graphql-codegen/named-operations-object',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typed-document-node',
-    title: 'TypedDocumentNode',
-    npmPackage: '@graphql-codegen/typed-document-node',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript-apollo-angular',
-    title: 'TypeScript Apollo Angular',
-    npmPackage: '@graphql-codegen/typescript-apollo-angular',
-    iconUrl: '/assets/img/icons/angular.svg',
-    tags: ['plugin', 'typescript', 'apollo', 'angular'],
-  },
-  {
-    identifier: 'typescript-msw',
-    title: 'typescript-msw',
-    npmPackage: '@graphql-codegen/typescript-msw',
-    iconUrl: 'https://raw.githubusercontent.com/mswjs/msw/HEAD/media/msw-logo.svg',
-    tags: ['plugin', 'typescript', 'utilities'],
-  },
-  {
-    identifier: 'typescript-apollo-client-helpers',
-    title: 'Apollo-Client Helpers',
-    npmPackage: '@graphql-codegen/typescript-apollo-client-helpers',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript', 'apollo'],
-  },
-  {
-    identifier: 'typescript-apollo-next',
-    title: 'Typescript Apollo Nextjs',
-    npmPackage: 'graphql-codegen-apollo-next-ssr',
-    iconUrl: '/assets/img/icons/apollo.svg',
-    tags: ['plugin', 'typescript', 'apollo', 'next'],
-  },
-  {
-    identifier: 'typescript-document-nodes',
-    title: 'TypeScript document nodes',
-    npmPackage: '@graphql-codegen/typescript-document-nodes',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript-generic-sdk',
-    title: 'TypeScript Generic SDK',
-    npmPackage: '@graphql-codegen/typescript-generic-sdk',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript-graphql-files-modules',
-    title: 'TypeScript GraphQL Files Modules',
-    npmPackage: '@graphql-codegen/typescript-graphql-files-modules',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript-graphql-request',
-    title: 'TypeScript GraphQL-Request',
-    npmPackage: '@graphql-codegen/typescript-graphql-request',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript-mongodb',
-    title: 'TypeScript MongoDB',
-    npmPackage: '@graphql-codegen/typescript-mongodb',
-    iconUrl: '/assets/img/icons/mongodb.png',
-    tags: ['plugin', 'typescript', 'mongodb'],
-  },
-  {
-    identifier: 'typescript-oclif',
-    title: 'TypeScript oclif',
-    npmPackage: '@graphql-codegen/typescript-oclif',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript-operations',
-    title: 'TypeScript Operations',
-    npmPackage: '@graphql-codegen/typescript-operations',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript',
-    title: 'TypeScript',
-    npmPackage: '@graphql-codegen/typescript',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript-react-apollo',
-    title: 'TypeScript React Apollo',
-    npmPackage: '@graphql-codegen/typescript-react-apollo',
-    iconUrl: '/assets/img/icons/apollo.svg',
-    tags: ['plugin', 'typescript', 'react', 'apollo'],
-  },
-  {
-    identifier: 'typescript-react-query',
-    title: 'TypeScript React-Query',
-    npmPackage: '@graphql-codegen/typescript-react-query',
-    iconUrl: '/assets/img/icons/react-query.svg',
-    tags: ['plugin', 'typescript', 'react'],
-  },
-  {
-    identifier: 'typescript-resolvers',
-    title: 'TypeScript Resolvers',
-    npmPackage: '@graphql-codegen/typescript-resolvers',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript-rtk-query',
-    title: 'TypeScript RTK-Query',
-    npmPackage: '@graphql-codegen/typescript-rtk-query',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript', 'react'],
-  },
-  {
-    identifier: 'typescript-stencil-apollo',
-    title: 'TypeScript Stencil Apollo',
-    npmPackage: '@graphql-codegen/typescript-stencil-apollo',
-    iconUrl: '/assets/img/icons/apollo.svg',
-    tags: ['plugin', 'typescript', 'apollo'],
-  },
-  {
-    identifier: 'typescript-svelte-apollo',
-    title: 'Typescript Svelte Apollo',
-    npmPackage: 'graphql-codegen-svelte-apollo',
-    iconUrl: '/assets/img/icons/apollo.svg',
-    tags: ['plugin', 'typescript', 'svelte', 'apollo'],
-  },
-  {
-    identifier: 'typescript-type-graphql',
-    title: 'TypeScript TypeGraphQL',
-    npmPackage: '@graphql-codegen/typescript-type-graphql',
-    iconUrl: '/assets/img/icons/type-graphql.png',
-    tags: ['plugin', 'typescript'],
-  },
-  {
-    identifier: 'typescript-urql',
-    title: 'TypeScript Urql',
-    npmPackage: '@graphql-codegen/typescript-urql',
-    iconUrl: '/assets/img/icons/typescript.svg',
-    tags: ['plugin', 'typescript', 'urql', 'react'],
-  },
-  {
-    identifier: 'typescript-vue-apollo',
-    title: 'TypeScript Vue Apollo Composition API',
-    npmPackage: '@graphql-codegen/typescript-vue-apollo',
-    iconUrl: '/assets/img/icons/vue.svg',
-    tags: ['plugin', 'typescript', 'vue', 'apollo'],
-  },
-  {
-    identifier: 'typescript-vue-apollo-smart-ops',
-    title: 'TypeScript Vue Apollo Smart Operations',
-    npmPackage: '@graphql-codegen/typescript-vue-apollo-smart-ops',
-    iconUrl: '/assets/img/icons/vue.svg',
-    tags: ['plugin', 'typescript', 'vue', 'apollo'],
-  },
-  {
-    identifier: 'typescript-vue-urql',
-    title: 'TypeScript Vue Urql',
-    npmPackage: '@graphql-codegen/typescript-vue-urql',
-    iconUrl: '/assets/img/icons/vue.svg',
-    tags: ['plugin', 'typescript', 'vue', 'urql'],
-  },
-  {
-    identifier: 'c-sharp-operations',
-    title: 'C# Operations',
-    npmPackage: '@graphql-codegen/c-sharp-operations',
-    iconUrl: '/assets/img/icons/csharp.svg',
-    tags: ['plugin', 'csharp'],
-  },
-  {
-    identifier: 'flow-operations',
-    title: 'Flow Operations',
-    npmPackage: '@graphql-codegen/flow-operations',
-    iconUrl: '/assets/img/icons/flow.svg',
-    tags: ['plugin', 'flow'],
-  },
-  {
-    identifier: 'flow-resolvers',
-    title: 'Flow Resolvers',
-    npmPackage: '@graphql-codegen/flow-resolvers',
-    iconUrl: '/assets/img/icons/flow.svg',
-    tags: ['plugin', 'flow'],
-  },
-  {
-    identifier: 'java',
-    title: 'Java',
-    npmPackage: '@graphql-codegen/java',
-    iconUrl: '/assets/img/icons/java.svg',
-    tags: ['plugin', 'java'],
-  },
-  {
-    identifier: 'java-apollo-android',
-    title: 'Java Apollo Android',
-    npmPackage: '@graphql-codegen/java-apollo-android',
-    iconUrl: '/assets/img/icons/java.svg',
-    tags: ['plugin', 'java', 'apollo', 'android'],
-  },
-  {
-    identifier: 'java-resolvers',
-    title: 'Java Resolvers',
-    npmPackage: '@graphql-codegen/java-resolvers',
-    iconUrl: '/assets/img/icons/java.svg',
-    tags: ['plugin', 'java'],
-  },
-  {
-    identifier: 'kotlin',
-    title: 'Kotlin',
-    npmPackage: '@graphql-codegen/kotlin',
-    iconUrl: '/assets/img/icons/java.svg',
-    tags: ['plugin', 'java', 'kotlin'],
-  },
-  {
-    identifier: 'reason-client',
-    title: 'Reason Client',
-    npmPackage: 'graphql-codegen-reason-client',
-    iconUrl: 'https://pbs.twimg.com/profile_images/1004185780313395200/ImZxrDWf_400x400.jpg',
-    tags: ['plugin', 'reason'],
-  },
-  {
-    identifier: 'add',
+> = {
+  add: {
     title: 'Add',
     npmPackage: '@graphql-codegen/add',
-    iconUrl: '/assets/img/icons/graphql.svg',
+    icon: 'graphql',
     tags: ['plugin'],
   },
-  {
-    identifier: 'fragment-matcher',
+  'c-sharp-operations': {
+    title: 'C# Operations',
+    npmPackage: '@graphql-codegen/c-sharp-operations',
+    icon: 'csharp',
+    tags: ['plugin', 'csharp'],
+  },
+  'flow-operations': {
+    title: 'Flow Operations',
+    npmPackage: '@graphql-codegen/flow-operations',
+    icon: 'flow',
+    tags: ['plugin', 'flow'],
+  },
+  'flow-resolvers': {
+    title: 'Flow Resolvers',
+    npmPackage: '@graphql-codegen/flow-resolvers',
+    icon: 'flow',
+    tags: ['plugin', 'flow'],
+  },
+  'fragment-matcher': {
     title: 'Fragment Matcher',
     npmPackage: '@graphql-codegen/fragment-matcher',
-    iconUrl: '/assets/img/icons/graphql.svg',
+    icon: 'graphql',
     tags: ['plugin', 'apollo'],
   },
-  {
-    identifier: 'introspection',
-    title: 'Introspection',
-    npmPackage: '@graphql-codegen/introspection',
-    iconUrl: '/assets/img/icons/graphql.svg',
-    tags: ['plugin', 'utilities'],
+  'gql-tag-operations-preset': {
+    title: 'Gql Tag Operations Preset',
+    npmPackage: '@graphql-codegen/gql-tag-operations-preset',
+    icon: 'codegen',
+    tags: ['preset', 'utilities', 'typescript'],
   },
-  {
-    identifier: 'jsdoc',
-    title: 'JSDoc',
-    npmPackage: '@graphql-codegen/jsdoc',
-    iconUrl: '/assets/img/icons/graphql.svg',
-    tags: ['plugin', 'jsdoc'],
+  'graphql-modules-preset': {
+    title: 'GraphQL Modules Preset',
+    npmPackage: '@graphql-codegen/graphql-modules-preset',
+    icon: 'graphql_modules',
+    tags: ['preset', 'utilities', 'resolvers'],
   },
-  {
-    identifier: 'relay-operation-optimizer',
-    title: 'Relay Operation Optimizer',
-    npmPackage: '@graphql-codegen/relay-operation-optimizer',
-    iconUrl: '/assets/img/icons/graphql.svg',
-    tags: ['plugin', 'relay'],
-  },
-  {
-    identifier: 'schema-ast',
-    title: 'Schema AST',
-    npmPackage: '@graphql-codegen/schema-ast',
-    iconUrl: '/assets/img/icons/graphql.svg',
-    tags: ['plugin', 'utilities'],
-  },
-  {
-    identifier: 'time',
-    title: 'Time',
-    npmPackage: '@graphql-codegen/time',
-    iconUrl: '/assets/img/icons/graphql.svg',
-    tags: ['plugin', 'utilities'],
-  },
-  {
-    identifier: 'urql-introspection',
-    title: 'Urql Introspection for Schema Awareness',
-    npmPackage: '@graphql-codegen/urql-introspection',
-    iconUrl: '/assets/img/icons/graphql.svg',
-    tags: ['plugin', 'urql', 'typescript'],
-  },
-  {
-    identifier: 'typescript-validation-schema',
-    title: 'TypeScript Validation Schema',
-    npmPackage: 'graphql-codegen-typescript-validation-schema',
-    iconUrl: '/assets/img/icons/graphql.svg',
-    tags: ['plugin', 'validation', 'yup', 'zod', 'typescript'],
-  },
-  {
-    identifier: 'hasura-allow-list',
+  'hasura-allow-list': {
     title: 'Hasura Allow List',
     npmPackage: '@graphql-codegen/hasura-allow-list',
-    iconUrl: '/assets/img/icons/hasura.svg',
+    icon: 'hasura',
     tags: ['plugin', 'utilities', 'hasura'],
   },
-];
-
-export const packageList = PACKAGES.map(p => ({
-  ...p,
-  readme: canUseDOM
-    ? ''
-    : loadGeneratedReadme({
-        pluginIdentifier: p.identifier,
-        templateFile: `docs-templates/${p.identifier}.md`,
-      }),
-}));
+  'import-types-preset': {
+    title: 'Import Types Preset',
+    npmPackage: '@graphql-codegen/import-types-preset',
+    icon: 'codegen',
+    tags: ['preset', 'utilities'],
+  },
+  'preset-client': {
+    title: 'Client preset',
+    npmPackage: '@graphql-codegen/client-preset',
+    icon: 'codegen',
+    tags: ['preset', 'next', 'react', 'urql', 'typescript', 'vue'],
+  },
+  introspection: {
+    title: 'Introspection',
+    npmPackage: '@graphql-codegen/introspection',
+    icon: 'graphql',
+    tags: ['plugin', 'utilities'],
+  },
+  java: {
+    title: 'Java',
+    npmPackage: '@graphql-codegen/java',
+    icon: 'java',
+    tags: ['plugin', 'java'],
+  },
+  'java-apollo-android': {
+    title: 'Java Apollo Android',
+    npmPackage: '@graphql-codegen/java-apollo-android',
+    icon: 'java',
+    tags: ['plugin', 'java', 'apollo', 'android'],
+  },
+  'java-resolvers': {
+    title: 'Java Resolvers',
+    npmPackage: '@graphql-codegen/java-resolvers',
+    icon: 'java',
+    tags: ['plugin', 'java'],
+  },
+  jsdoc: {
+    title: 'JSDoc',
+    npmPackage: '@graphql-codegen/jsdoc',
+    icon: 'graphql',
+    tags: ['plugin', 'jsdoc'],
+  },
+  kotlin: {
+    title: 'Kotlin',
+    npmPackage: '@graphql-codegen/kotlin',
+    icon: 'java',
+    tags: ['plugin', 'java', 'kotlin'],
+  },
+  'named-operations-object': {
+    title: 'Named Operations Object',
+    npmPackage: '@graphql-codegen/named-operations-object',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'near-operation-file-preset': {
+    title: 'Near Operation File Preset',
+    npmPackage: '@graphql-codegen/near-operation-file-preset',
+    icon: 'codegen',
+    tags: ['preset', 'utilities'],
+  },
+  'reason-client': {
+    title: 'Reason Client',
+    npmPackage: 'graphql-codegen-reason-client',
+    icon: 'reason_client',
+    tags: ['plugin', 'reason'],
+  },
+  'relay-operation-optimizer': {
+    title: 'Relay Operation Optimizer',
+    npmPackage: '@graphql-codegen/relay-operation-optimizer',
+    icon: 'graphql',
+    tags: ['plugin', 'relay'],
+  },
+  'schema-ast': {
+    title: 'Schema AST',
+    npmPackage: '@graphql-codegen/schema-ast',
+    icon: 'graphql',
+    tags: ['plugin', 'utilities'],
+  },
+  time: {
+    title: 'Time',
+    npmPackage: '@graphql-codegen/time',
+    icon: 'graphql',
+    tags: ['plugin', 'utilities'],
+  },
+  'typed-document-node': {
+    title: 'TypedDocumentNode',
+    npmPackage: '@graphql-codegen/typed-document-node',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  typescript: {
+    title: 'TypeScript',
+    npmPackage: '@graphql-codegen/typescript',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-apollo-angular': {
+    title: 'TypeScript Apollo Angular',
+    npmPackage: '@graphql-codegen/typescript-apollo-angular',
+    icon: 'angular',
+    tags: ['plugin', 'typescript', 'apollo', 'angular'],
+  },
+  'typescript-apollo-client-helpers': {
+    title: 'Apollo-Client Helpers',
+    npmPackage: '@graphql-codegen/typescript-apollo-client-helpers',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript', 'apollo'],
+  },
+  'typescript-apollo-next': {
+    title: 'Typescript Apollo Next.js',
+    npmPackage: 'graphql-codegen-apollo-next-ssr',
+    icon: 'apollo',
+    tags: ['plugin', 'typescript', 'apollo', 'next'],
+  },
+  'typescript-document-nodes': {
+    title: 'TypeScript Document Nodes',
+    npmPackage: '@graphql-codegen/typescript-document-nodes',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-generic-sdk': {
+    title: 'TypeScript Generic SDK',
+    npmPackage: '@graphql-codegen/typescript-generic-sdk',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-graphql-files-modules': {
+    title: 'TypeScript GraphQL Files Modules',
+    npmPackage: '@graphql-codegen/typescript-graphql-files-modules',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-graphql-request': {
+    title: 'TypeScript GraphQL-Request',
+    npmPackage: '@graphql-codegen/typescript-graphql-request',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-mock-data': {
+    title: 'TypeScript Mock Data',
+    npmPackage: 'graphql-codegen-typescript-mock-data',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-mongodb': {
+    title: 'TypeScript MongoDB',
+    npmPackage: '@graphql-codegen/typescript-mongodb',
+    icon: 'mongodb',
+    tags: ['plugin', 'typescript', 'mongodb'],
+  },
+  'typescript-msw': {
+    title: 'TypeScript Msw',
+    npmPackage: '@graphql-codegen/typescript-msw',
+    icon: 'msw',
+    tags: ['plugin', 'typescript', 'utilities'],
+  },
+  'typescript-oclif': {
+    title: 'TypeScript Oclif',
+    npmPackage: '@graphql-codegen/typescript-oclif',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-operations': {
+    title: 'TypeScript Operations',
+    npmPackage: '@graphql-codegen/typescript-operations',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-react-apollo': {
+    title: 'TypeScript React Apollo',
+    npmPackage: '@graphql-codegen/typescript-react-apollo',
+    icon: 'apollo',
+    tags: ['plugin', 'typescript', 'react', 'apollo'],
+  },
+  'typescript-react-query': {
+    title: 'TypeScript React-Query',
+    npmPackage: '@graphql-codegen/typescript-react-query',
+    icon: 'react_query',
+    tags: ['plugin', 'typescript', 'react'],
+  },
+  'typescript-resolvers': {
+    title: 'TypeScript Resolvers',
+    npmPackage: '@graphql-codegen/typescript-resolvers',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-rtk-query': {
+    title: 'TypeScript RTK-Query',
+    npmPackage: '@graphql-codegen/typescript-rtk-query',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript', 'react'],
+  },
+  'typescript-stencil-apollo': {
+    title: 'TypeScript Stencil Apollo',
+    npmPackage: '@graphql-codegen/typescript-stencil-apollo',
+    icon: 'apollo',
+    tags: ['plugin', 'typescript', 'apollo'],
+  },
+  'typescript-svelte-apollo': {
+    title: 'TypeScript Svelte Apollo',
+    npmPackage: 'graphql-codegen-svelte-apollo',
+    icon: 'apollo',
+    tags: ['plugin', 'typescript', 'svelte', 'apollo'],
+  },
+  'typescript-type-graphql': {
+    title: 'TypeScript TypeGraphQL',
+    npmPackage: '@graphql-codegen/typescript-type-graphql',
+    icon: 'type_graphql',
+    tags: ['plugin', 'typescript'],
+  },
+  'typescript-urql': {
+    title: 'TypeScript Urql',
+    npmPackage: '@graphql-codegen/typescript-urql',
+    icon: 'typescript',
+    tags: ['plugin', 'typescript', 'urql', 'react'],
+  },
+  'typescript-validation-schema': {
+    title: 'TypeScript Validation Schema',
+    npmPackage: 'graphql-codegen-typescript-validation-schema',
+    icon: 'graphql',
+    tags: ['plugin', 'validation', 'yup', 'zod', 'typescript'],
+  },
+  'typescript-vue-apollo': {
+    title: 'TypeScript Vue Apollo Composition API',
+    npmPackage: '@graphql-codegen/typescript-vue-apollo',
+    icon: 'vue',
+    tags: ['plugin', 'typescript', 'vue', 'apollo'],
+  },
+  'typescript-vue-apollo-smart-ops': {
+    title: 'TypeScript Vue Apollo Smart Operations',
+    npmPackage: '@graphql-codegen/typescript-vue-apollo-smart-ops',
+    icon: 'vue',
+    tags: ['plugin', 'typescript', 'vue', 'apollo'],
+  },
+  'typescript-vue-urql': {
+    title: 'TypeScript Vue Urql',
+    npmPackage: '@graphql-codegen/typescript-vue-urql',
+    icon: 'vue',
+    tags: ['plugin', 'typescript', 'vue', 'urql'],
+  },
+  'urql-introspection': {
+    title: 'Urql Introspection for Schema Awareness',
+    npmPackage: '@graphql-codegen/urql-introspection',
+    icon: 'graphql',
+    tags: ['plugin', 'urql', 'typescript'],
+  },
+  'flutter-freezed': {
+    title: 'Dart Flutter Freezed Classes',
+    npmPackage: '@graphql-codegen/flutter-freezed',
+    icon: 'dart',
+    tags: ['plugin', 'dart', 'flutter'],
+  },
+};

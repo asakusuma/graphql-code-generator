@@ -1,6 +1,6 @@
-import { ParsedConfig, RawConfig, BaseVisitor, BaseVisitorConvertOptions } from './base-visitor';
+import { ParsedConfig, RawConfig, BaseVisitor, BaseVisitorConvertOptions } from './base-visitor.js';
 import autoBind from 'auto-bind';
-import { DEFAULT_SCALARS } from './scalars';
+import { DEFAULT_SCALARS } from './scalars.js';
 import {
   NormalizedScalarsMap,
   EnumValuesMap,
@@ -8,7 +8,7 @@ import {
   DeclarationKind,
   ConvertOptions,
   AvoidOptionalsConfig,
-} from './types';
+} from './types.js';
 import {
   DeclarationBlock,
   DeclarationBlockConfig,
@@ -20,7 +20,7 @@ import {
   REQUIRE_FIELDS_TYPE,
   wrapTypeWithModifiers,
   buildScalarsFromConfig,
-} from './utils';
+} from './utils.js';
 import {
   NameNode,
   ListTypeNode,
@@ -45,9 +45,9 @@ import {
   ASTNode,
 } from 'graphql';
 
-import { OperationVariablesToObject } from './variables-to-object';
-import { ParsedMapper, parseMapper, transformMappers, ExternalParsedMapper, buildMapperImport } from './mappers';
-import { parseEnumValues } from './enum-values';
+import { OperationVariablesToObject } from './variables-to-object.js';
+import { ParsedMapper, parseMapper, transformMappers, ExternalParsedMapper, buildMapperImport } from './mappers.js';
+import { parseEnumValues } from './enum-values.js';
 import { ApolloFederation, getBaseType } from '@graphql-codegen/plugin-helpers';
 import { getRootTypeNames } from '@graphql-tools/utils';
 
@@ -81,9 +81,21 @@ export interface RawResolversConfig extends RawConfig {
    * @description Adds `_` to generated `Args` types in order to avoid duplicate identifiers.
    *
    * @exampleMarkdown
-   * ```yaml
-   *   config:
-   *     addUnderscoreToArgsType: true
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          addUnderscoreToArgsType: true
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    */
@@ -97,18 +109,40 @@ export interface RawResolversConfig extends RawConfig {
    * @exampleMarkdown
    * ## Custom Context Type
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     contextType: MyContext
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          contextType: 'MyContext'
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    * ## Custom Context Type
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     contextType: ./my-types#MyContext
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          contextType: './my-types#MyContext'
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   contextType?: string;
@@ -120,12 +154,21 @@ export interface RawResolversConfig extends RawConfig {
    * @exampleMarkdown
    * ## Custom Field Context Types
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     fieldContextTypes:
-   *       - MyType.foo#CustomContextType
-   *       - MyType.bar#./my-file#ContextTypeOne
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          fieldContextTypes: ['MyType.foo#CustomContextType', 'MyType.bar#./my-file#ContextTypeOne']
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    */
@@ -139,21 +182,43 @@ export interface RawResolversConfig extends RawConfig {
    * @exampleMarkdown
    * ## Custom RootValue Type
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     rootValueType: MyRootValue
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          rootValueType: 'MyRootValue'
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    * ## Custom RootValue Type
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     rootValueType: ./my-types#MyRootValue
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          rootValueType: './my-types#MyRootValue'
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
-  directiveContextTypes?: Array<string>;
+  rootValueType?: string;
   /**
    * @description Use this to set a custom type for a specific field `context` decorated by a directive.
    * It will only affect the targeted resolvers.
@@ -164,23 +229,44 @@ export interface RawResolversConfig extends RawConfig {
    * @exampleMarkdown
    * ## Directive Context Extender
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     directiveContextTypes:
-   *       - myCustomDirectiveName#./my-file#CustomContextExtender
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          directiveContextTypes: ['myCustomDirectiveName#./my-file#CustomContextExtender']
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    */
-  rootValueType?: string;
+  directiveContextTypes?: Array<string>;
   /**
    * @description Adds a suffix to the imported names to prevent name clashes.
    *
    * @exampleMarkdown
-   * ```yaml
-   * plugins
-   *   config:
-   *     mapperTypeSuffix: Model
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          mapperTypeSuffix: 'Model'
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   mapperTypeSuffix?: string;
@@ -192,12 +278,24 @@ export interface RawResolversConfig extends RawConfig {
    * @exampleMarkdown
    * ## Custom Context Type
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     mappers:
-   *       User: ./my-models#UserDbObject
-   *       Book: ./my-models#Collections#Book
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          mappers: {
+   *            User: './my-models#UserDbObject',
+   *            Book: './my-models#Collections',
+   *          }
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   mappers?: { [typeName: string]: string };
@@ -209,41 +307,80 @@ export interface RawResolversConfig extends RawConfig {
    * @exampleMarkdown
    * ## Replace with any
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     defaultMapper: any
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          defaultMapper: 'any',
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    * ## Custom Base Object
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     defaultMapper: ./my-file#BaseObject
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          defaultMapper: './my-file#BaseObject',
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    * ## Wrap default types with Partial
    *
    * You can also specify a custom wrapper for the original type, without overriding the original generated types, use `{T}` to specify the identifier. (for flow, use `$Shape<{T}>`)
    *
-   * ```yaml
-   * plugins
-   *   config:
-   *     defaultMapper: Partial<{T}>
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        // plugins...
+   *        config: {
+   *          defaultMapper: 'Partial<{T}>',
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    * ## Allow deep partial with `utility-types`
    *
-   * ```yaml
-   * plugins
-   *   plugins:
-   *     - 'typescript'
-   *     - 'typescript-resolvers'
-   *     - add:
-   *         content: "import { DeepPartial } from 'utility-types';"
-   *   config:
-   *     defaultMapper: DeepPartial<{T}>
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        plugins: ['typescript', 'typescript-resolver', { add: { content: "import { DeepPartial } from 'utility-types';" } }],
+   *        config: {
+   *          defaultMapper: 'DeepPartial<{T}>',
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   defaultMapper?: string;
@@ -255,29 +392,45 @@ export interface RawResolversConfig extends RawConfig {
    * @exampleMarkdown
    * ## Override all definition types
    *
-   * ```yaml
-   * generates:
-   *   path/to/file.ts:
-   *     plugins:
-   *       - typescript
-   *       - typescript-resolvers
-   *     config:
-   *       avoidOptionals: true
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        plugins: ['typescript', 'typescript-resolver'],
+   *        config: {
+   *          avoidOptionals: true
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    *
    * ## Override only specific definition types
    *
-   * ```yaml
-   * generates:
-   *   path/to/file.ts:
-   *     plugins:
-   *       - typescript
-   *     config:
-   *       avoidOptionals:
-   *         field: true
-   *         inputValue: true
-   *         object: true
-   *         defaultValue: true
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        plugins: ['typescript', 'typescript-resolver'],
+   *        config: {
+   *          avoidOptionals: {
+   *            field: true,
+   *            inputValue: true,
+   *            object: true,
+   *            defaultValue: true,
+   *          }
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   avoidOptionals?: boolean | AvoidOptionalsConfig;
@@ -286,14 +439,21 @@ export interface RawResolversConfig extends RawConfig {
    * @default true
    *
    * @exampleMarkdown
-   * ```yaml
-   * generates:
-   *   path/to/file.ts:
-   *     plugins:
-   *       - typescript
-   *       - typescript-resolvers
-   *     config:
-   *       showUnusedMappers: true
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        plugins: ['typescript', 'typescript-resolver'],
+   *        config: {
+   *          showUnusedMappers: true,
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   showUnusedMappers?: boolean;
@@ -320,10 +480,22 @@ export interface RawResolversConfig extends RawConfig {
    * @exampleMarkdown
    * ## Disable enum prefixes
    *
-   * ```yaml
-   *   config:
-   *     typesPrefix: I
-   *     enumPrefix: false
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file': {
+   *        plugins: ['typescript', 'typescript-resolver'],
+   *        config: {
+   *          typesPrefix: 'I',
+   *          enumPrefix: false
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
    * ```
    */
   enumPrefix?: boolean;
@@ -431,7 +603,7 @@ export class BaseResolversVisitor<
       mappers: transformMappers(rawConfig.mappers || {}, rawConfig.mapperTypeSuffix),
       scalars: buildScalarsFromConfig(_schema, rawConfig, defaultScalars),
       internalResolversPrefix: getConfigValue(rawConfig.internalResolversPrefix, '__'),
-      ...(additionalConfig || {}),
+      ...additionalConfig,
     } as TPluginConfig);
 
     autoBind(this);
@@ -552,7 +724,8 @@ export class BaseResolversVisitor<
         prev[typeName] = applyWrapper(this.config.rootValueType.type);
 
         return prev;
-      } else if (isMapped && this.config.mappers[typeName].type) {
+      }
+      if (isMapped && this.config.mappers[typeName].type) {
         this.markMapperAsUsed(typeName);
         prev[typeName] = applyWrapper(this.config.mappers[typeName].type);
       } else if (isInterfaceType(schemaType)) {
@@ -974,7 +1147,7 @@ export class BaseResolversVisitor<
       const realType = baseType.name.value;
       const parentType = this.schema.getType(parentName);
 
-      if (this._federation.skipField({ fieldNode: original, parentType: parentType })) {
+      if (this._federation.skipField({ fieldNode: original, parentType })) {
         return null;
       }
 

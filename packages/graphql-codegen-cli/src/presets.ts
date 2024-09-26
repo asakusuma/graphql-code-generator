@@ -1,4 +1,4 @@
-import { DetailedError, Types } from '@graphql-codegen/plugin-helpers';
+import { Types } from '@graphql-codegen/plugin-helpers';
 import { resolve } from 'path';
 
 export async function getPresetByName(
@@ -18,16 +18,22 @@ export async function getPresetByName(
 
       if (loaded && loaded.preset) {
         return loaded.preset;
-      } else if (loaded && loaded.default) {
+      }
+      if (loaded && loaded.default) {
         return loaded.default;
       }
 
       return loaded as Types.OutputPreset;
     } catch (err) {
-      if (err.code !== 'MODULE_NOT_FOUND') {
-        throw new DetailedError(
-          `Unable to load preset matching ${name}`,
-          `
+      if (
+        /** CJS Error code */
+        err.code !== 'MODULE_NOT_FOUND' &&
+        /** ESM Error code */
+        err.code !== 'ERR_MODULE_NOT_FOUND'
+      ) {
+        throw new Error(
+          `Unable to load preset matching ${name}
+
               Unable to load preset matching '${name}'.
               Reason:
                 ${err.message}
@@ -45,9 +51,9 @@ export async function getPresetByName(
     )
     .join('');
 
-  throw new DetailedError(
-    `Unable to find preset matching ${name}`,
-    `
+  throw new Error(
+    `Unable to find preset matching ${name}
+
         Unable to find preset matching '${name}'
         Install one of the following packages:
 

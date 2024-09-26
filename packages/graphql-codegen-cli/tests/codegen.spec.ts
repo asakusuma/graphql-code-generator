@@ -1,7 +1,7 @@
 import { useMonorepo } from '@graphql-codegen/testing';
-import { GraphQLObjectType, buildSchema, buildASTSchema, parse, print } from 'graphql';
 import { mergeTypeDefs } from '@graphql-tools/merge';
-import { executeCodegen } from '../src';
+import { buildASTSchema, buildSchema, GraphQLObjectType, parse, print } from 'graphql';
+import { createContext, executeCodegen } from '../src/index.js';
 import { join } from 'path';
 
 const SHOULD_NOT_THROW_STRING = 'SHOULD_NOT_THROW';
@@ -17,7 +17,9 @@ describe('Codegen Executor', () => {
   monorepo.correctCWD();
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({
+      legacyFakeTimers: true,
+    });
   });
 
   describe('Generator General Options', () => {
@@ -110,7 +112,7 @@ describe('Codegen Executor', () => {
         throw new Error(SHOULD_NOT_THROW_STRING);
       } catch (e) {
         expect(e.message).not.toBe(SHOULD_NOT_THROW_STRING);
-        expect(e.message).toBe('Invalid Codegen Configuration!');
+        expect(e.message).toMatch('Invalid Codegen Configuration!');
       }
     });
 
@@ -141,7 +143,7 @@ describe('Codegen Executor', () => {
         expect(output.length).toBe(1);
       } catch (e) {
         expect(e.message).not.toBe(SHOULD_NOT_THROW_STRING);
-        expect(e.message).not.toBe('Invalid Codegen Configuration!');
+        expect(e.message).not.toMatch('Invalid Codegen Configuration!');
       }
     });
 
@@ -157,7 +159,7 @@ describe('Codegen Executor', () => {
 
         throw new Error(SHOULD_NOT_THROW_STRING);
       } catch (e) {
-        expect(e.message).toBe('Invalid Codegen Configuration!');
+        expect(e.message).toMatch('Invalid Codegen Configuration!');
         expect(e.message).not.toBe(SHOULD_NOT_THROW_STRING);
       }
     });
@@ -175,7 +177,7 @@ describe('Codegen Executor', () => {
         throw new Error(SHOULD_NOT_THROW_STRING);
       } catch (e) {
         expect(e.message).not.toBe(SHOULD_NOT_THROW_STRING);
-        expect(e.message).toBe('Invalid Codegen Configuration!');
+        expect(e.message).toMatch('Invalid Codegen Configuration!');
       }
     });
 
@@ -385,7 +387,7 @@ describe('Codegen Executor', () => {
         },
       });
 
-      const content = result[0].content;
+      const { content } = result[0];
 
       expect(content).toContain('Used graphql-tag'); // import gql from 'graphql-tag'
       expect(content).toContain('Used gatsby'); // import { graphql } from 'gatsby'
@@ -409,7 +411,7 @@ describe('Codegen Executor', () => {
         },
       });
 
-      const content = result[0].content;
+      const { content } = result[0];
 
       expect(content).toContain('Used custom parser'); // import { parser } from 'custom-graphql-parser';
       expect(content).not.toContain('Used graphql-tag');
@@ -961,6 +963,7 @@ describe('Codegen Executor', () => {
       throw new Error('This should not throw as the invalid file is excluded via glob.');
     }
   });
+
   it('Should allow plugins to extend schema with custom root', async () => {
     try {
       const output = await executeCodegen({
@@ -1064,7 +1067,23 @@ describe('Codegen Executor', () => {
         },
       });
     } catch (error) {
-      expect(error.message).toContain('Failed to load schema for "out1.graphql"');
+      expect(error.message).toContain('Failed to load schema from');
     }
+  });
+
+  it('Should generate documents output even if prj1/documents and prj1/extensions/codegen/generate/xxx/documents are both definded with the same glob files', async () => {
+    const prj1 = await createContext({
+      config: './tests/test-files/graphql.config.js',
+      project: 'prj1',
+      errorsOnly: true,
+      overwrite: true,
+      profile: true,
+      require: [],
+      silent: false,
+      watch: false,
+    });
+    const config = prj1.getConfig();
+    const output = await executeCodegen(config);
+    expect(output[0].content).toContain('DocumentNode<MyQueryQuery, MyQueryQueryVariables>');
   });
 });

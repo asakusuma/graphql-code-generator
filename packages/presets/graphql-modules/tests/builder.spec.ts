@@ -1,7 +1,7 @@
 import '@graphql-codegen/testing';
 import { BaseVisitor } from '@graphql-codegen/visitor-plugin-common';
 import { parse } from 'graphql';
-import { buildModule } from '../src/builder';
+import { buildModule } from '../src/builder.js';
 
 const ROOT_TYPES = ['Query'];
 
@@ -70,6 +70,7 @@ test('should generate interface field resolvers', () => {
       importPath: '../types',
       importNamespace: 'core',
       encapsulate: 'none',
+      requireRootResolvers: false,
       shouldDeclare: false,
       rootTypes: ROOT_TYPES,
       baseVisitor,
@@ -108,6 +109,7 @@ test('should not generate graphql-modules code when useGraphQLModules=false', ()
       rootTypes: ROOT_TYPES,
       baseVisitor,
       useGraphQLModules: false,
+      requireRootResolvers: false,
     }
   );
 
@@ -131,6 +133,7 @@ test('should generate interface extensions field resolvers ', () => {
       importPath: '../types',
       importNamespace: 'core',
       encapsulate: 'none',
+      requireRootResolvers: false,
       shouldDeclare: false,
       rootTypes: ROOT_TYPES,
       baseVisitor,
@@ -148,6 +151,7 @@ test('should include import statement', () => {
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -159,11 +163,30 @@ test('should include import statement', () => {
   `);
 });
 
+test('should include import type statement', () => {
+  const output = buildModule('test', testDoc, {
+    importPath: '../types',
+    importNamespace: 'core',
+    encapsulate: 'none',
+    requireRootResolvers: false,
+    shouldDeclare: false,
+    rootTypes: ROOT_TYPES,
+    baseVisitor,
+    useGraphQLModules: true,
+    useTypeImports: true,
+  });
+
+  expect(output).toBeSimilarStringTo(`
+    import type * as core from "../types";
+  `);
+});
+
 test('should work with naming conventions', () => {
   const output = buildModule('test', parse(`type query_root { test: ID! } schema { query: query_root }`), {
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -179,6 +202,7 @@ test('encapsulate: should wrap correctly with namespace', () => {
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'namespace',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -194,6 +218,7 @@ test('encapsulate: should wrap correctly with a declared namespace', () => {
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'namespace',
+    requireRootResolvers: false,
     shouldDeclare: true,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -208,6 +233,7 @@ test('encapsulate: should wrap correctly with prefix', () => {
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'prefix',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -232,6 +258,7 @@ test('should pick fields from defined and extended types', () => {
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -265,6 +292,7 @@ test('should reexport used types but not defined in module', () => {
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -284,6 +312,7 @@ test('should export partial types, only those defined in module or root types', 
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -315,6 +344,7 @@ test('should export partial types of scalars, only those defined in module or ro
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -336,6 +366,7 @@ test('should use and export resolver signatures of types defined or extended in 
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -374,6 +405,7 @@ test('should not generate resolver signatures of types that are not defined or e
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -388,6 +420,7 @@ test('should generate an aggregation of individual resolver signatures', () => {
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
@@ -410,6 +443,7 @@ test('should generate a signature for ResolveMiddleware (with widlcards)', () =>
     importPath: '../types',
     importNamespace: 'core',
     encapsulate: 'none',
+    requireRootResolvers: false,
     shouldDeclare: false,
     rootTypes: ROOT_TYPES,
     baseVisitor,
